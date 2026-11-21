@@ -1,4 +1,4 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SMC × TradingView Scanner</title><meta name="description" content="Smart Money Concepts live scanner: CHoCH, FVG, Order Block, confirmation, backtest"><meta name="theme-color" content="#0b0f17"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0f17'/%3E%3Cpath d='M5 22l7-8 5 4 10-11' stroke='%2326a69a' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SMC × TradingView Scanner · Rating Sync</title><meta name="description" content="Smart Money Concepts live scanner: CHoCH, FVG, Order Block, confirmation, backtest"><meta name="theme-color" content="#0b0f17"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0f17'/%3E%3Cpath d='M5 22l7-8 5 4 10-11' stroke='%2326a69a' stroke-width='3' fill='none'/%3E%3C/svg%3E">
 <style>
 :root{--bg:#0b0f17;--p:#131a26;--b:#232d3f;--t:#d7deea;--m:#7b879c;--g:#26a69a;--r:#ef5350;--y:#f5b73b;--bl:#4c8dff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px system-ui,sans-serif}
@@ -16,10 +16,13 @@ h1{font-size:16px;margin:0 8px 0 0}.pill{padding:3px 9px;border:1px solid var(--
 @media(max-width:1250px){.charts{grid-template-columns:1fr}}
 canvas{width:100%;height:270px;display:block}
 table{border-collapse:collapse;width:100%;margin:6px 0}td,th{border:1px solid var(--b);padding:5px 7px;text-align:center}th{color:var(--m);font-weight:500}
-.ok{color:var(--g)}.no{color:var(--m)}h3{margin:10px 0 4px;font-size:13px;color:var(--y)}p{margin:4px 0;line-height:1.5}.warn{color:var(--m);font-size:11px}.tvw{height:330px;margin-bottom:6px}body[data-view=tv] canvas{display:none}body[data-view=smc] .tvw{display:none}.btn{cursor:pointer;background:none}
+.ok{color:var(--g)}.no{color:var(--m)}h3{margin:10px 0 4px;font-size:13px;color:var(--y)}p{margin:4px 0;line-height:1.5}.warn{color:var(--m);font-size:11px}.tvw{height:330px;margin-bottom:6px}body[data-view=tv] canvas{display:none}body[data-view=smc] .tvw{display:none}.btn{cursor:pointer;background:none}body[data-view=smc] #tga{display:none}
+.rb{display:inline-block;padding:1px 6px;border-radius:5px;font-size:11px;font-weight:600;border:1px solid var(--b);color:var(--t)}.rb.up{background:#0f3d38;border-color:var(--g);color:#7ff0e2}.rb.dn{background:#4a1d1d;border-color:var(--r);color:#ffb4b2}.rb.no{color:var(--m)}
+#syt{font-size:12px;margin:0}#syt th{white-space:nowrap}#syt td{vertical-align:middle;white-space:nowrap}#syt td.w{white-space:normal;min-width:300px;text-align:left}#syt tr[data-s]{cursor:pointer}#syt tr.sel,#syt tr[data-s]:hover{background:#1b2638}#syt small{display:block;color:var(--m);font-size:10px;line-height:1.35}
+.vok{color:var(--g)}.vwt{color:var(--y)}.vbad{color:var(--r)}.vno{color:var(--m)}
 </style></head><body>
 <header><h1>SMC × TradingView</h1><span id="vw"></span><span id="ses"></span><span class="pill" id="clk"></span><span class="pill" id="feed"></span><button class="pill btn on" id="sf">SAFE SCALP: ON</button><button class="pill btn on" id="af">AUTO-FOLLOW: ON</button><button class="pill" id="cfg" style="cursor:pointer;background:none">⚙ Data</button></header>
-<div class="warn" style="padding:6px 14px">Harga &amp; chart = widget resmi TradingView (real-time). Mesin SMC mengambil candle asli secara otomatis (Binance / Yahoo Finance / Twelve Data), memindai 20 ticker terus-menerus di 1H·15M·5M dan mengikuti ticker TradingView yang sama. Selisih kecil harga dengan TradingView wajar. Tidak ada harga simulasi; <b>Data Guard</b> memblokir rekomendasi jika data tidak valid, cache atau tertunda. <b>Mode SAFE SCALP (default):</b> BUY/SELL hanya muncul saat 1H·15M·5M searah dan tren bersih (tidak fluktuatif), dengan target cepat RR 1:1,5, SL ketat, risiko ≤0,5%. Saat pasar fluktuatif tampil SKIP. <b>BUY?/SELL?</b> = kandidat lolos filter, harga sedang diperbarui (tunggu hingga tanpa tanda tanya).</div>
+<div class="warn" style="padding:6px 14px">Harga &amp; chart = widget resmi TradingView (real-time). Mesin SMC mengambil candle asli secara otomatis (Binance / Yahoo Finance / Twelve Data), memindai 20 ticker terus-menerus di 1H·15M·5M dan mengikuti ticker TradingView yang sama. Selisih kecil harga dengan TradingView wajar. Tidak ada harga simulasi; <b>Data Guard</b> memblokir rekomendasi jika data tidak valid, cache atau tertunda. <b>Mode SAFE SCALP (default):</b> BUY/SELL hanya muncul saat 1H·15M·5M searah dan tren bersih (tidak fluktuatif), dengan target cepat RR 1:1,5, SL ketat, risiko ≤0,5%. Saat pasar fluktuatif tampil SKIP. <b>BUY?/SELL?</b> = kandidat lolos filter, harga sedang diperbarui (tunggu hingga tanpa tanda tanya). <b>Technical Rating</b> (Strong Sell → Strong Buy, gaya TradingView, dihitung dari candle asli yang sama) hanya menunjukkan arah umum, <u>bukan titik entry</u>. Tabel <b>Rating × SMC</b> menyinkronkannya dengan analisis SMC valid (CHoCH + OB/FVG + retest + konfirmasi) dan memberi panduan entry/SL/TP nyata; bila rating melawan SMC atau harga sudah jauh dari zona, tampil <b>KONFLIK</b> / <b>JANGAN KEJAR</b>.</div>
 <div id="setup" class="box" style="display:none;margin:0 14px 8px;border-color:#f5b73b;line-height:1.5">⚠ Baru <b id="setn">0</b>/20 ticker yang punya data asli. <b>Cara tercepat (±1 menit, gratis):</b> daftar di twelvedata.com → salin API key → klik <b>⚙ Data</b> → tempel di <b>Twelve Data API key</b> → Simpan. Forex, emas, perak, DXY, ETF &amp; saham terisi otomatis (data disimpan di browser agar hemat kuota 800 kredit/hari). Crypto (BTC/ETH) selalu live lewat Binance. Gunakan tombol <b>Cek sumber data</b> untuk melihat sumber mana yang bekerja di jaringan Anda. Opsional real-time penuh: Worker/GitHub Actions (lihat README).</div>
 <div id="mod" style="display:none;position:fixed;inset:0;background:#000b;z-index:9;align-items:center;justify-content:center"><div class="box" style="max-width:440px;width:92%;padding:16px">
 <b style="font-size:15px">Pengaturan Sumber Data</b>
@@ -28,7 +31,7 @@ table{border-collapse:collapse;width:100%;margin:6px 0}td,th{border:1px solid va
 <p>Worker URL (opsional – real-time 10 detik):<br><input id="px" placeholder="https://nama.workers.dev/" style="width:100%;margin-top:4px;padding:7px;background:#0b0f17;color:#d7deea;border:1px solid #232d3f;border-radius:6px"></p><p class="warn">Tanpa key: hanya BTC/ETH (Binance) dan percobaan Yahoo lewat proxy publik (tidak stabil). Dengan key gratis: riwayat dimuat sekali lalu diperbarui bertahap (ticker terpilih ±5 menit, ticker sesi aktif ±30 menit, menyesuaikan sisa kuota harian) dan disimpan di browser. Pengaturan hanya tersimpan di browser Anda.</p>
 <div id="tst" class="warn" style="margin-top:8px;line-height:1.6"></div><div style="display:flex;gap:8px;margin-top:10px"><button class="pill" id="tt" style="cursor:pointer;background:none">Cek sumber data</button><button class="pill on" id="sv" style="cursor:pointer">Simpan</button><button class="pill" id="cx" style="cursor:pointer;background:none">Tutup</button><button class="pill" id="rs" style="cursor:pointer;background:none;margin-left:auto">Reset</button></div></div></div>
 <div class="app"><aside class="box"><div class="tabs" id="tabs"></div><div id="list"></div><h3>Signal log (otomatis)</h3><div id="log"></div></aside>
-<main><div class="charts" id="charts"></div><div class="box" id="ana" style="margin-top:10px"></div><div class="box" id="scrbox" style="margin-top:10px"><b>TradingView Screener</b><div class="tabs" id="stabs" style="margin-top:6px"></div><div id="scr" style="height:520px"></div></div></main></div>
+<main><div class="box" id="syn" style="margin-bottom:10px"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><b style="font-size:14px">Technical Rating × SMC · Panduan Entry Tersinkron</b><span class="pill" id="sycnt"></span><button class="pill btn" id="syo">Hanya siap entry: OFF</button><span class="warn">klik baris untuk memilih ticker · urut dari paling siap entry</span></div><div id="synw" style="overflow-x:auto;margin-top:6px"><table id="syt"></table></div><p class="warn"><b>ENTRY VALID · SYNC</b> = rating searah + SMC terkonfirmasi + lolos Data Guard &amp; filter. <b>TUNGGU RETEST / KONFIRMASI</b> = setup SMC ada tetapi harga belum di titik entry (kolom Entry = limit di zona). <b>JANGAN KEJAR</b> = harga sudah &gt;0,6 ATR dari entry, tunggu pullback. <b>KONFLIK</b> = rating melawan SMC. <b>RATING ≠ ENTRY</b> = ada bias rating tetapi belum ada setup SMC valid. Rating dihitung lokal (11 MA + 9 osilator gaya TradingView); indikator yang datanya kurang dilewati.</p></div><div class="charts" id="charts"></div><div class="charts" id="tga" style="margin-top:10px"><div class="box"><b class="warn">TradingView Technical Rating · 1H</b><div class="tvw" id="ta_h1"></div></div><div class="box"><b class="warn">TradingView Technical Rating · 15M</b><div class="tvw" id="ta_m15"></div></div><div class="box"><b class="warn">TradingView Technical Rating · 5M</b><div class="tvw" id="ta_m5"></div></div></div><div class="box" id="ana" style="margin-top:10px"></div><div class="box" id="scrbox" style="margin-top:10px"><b>TradingView Screener</b><div class="tabs" id="stabs" style="margin-top:6px"></div><div class="tabs" id="ctabs"></div><div id="scr" style="height:520px"></div></div></main></div>
 <footer class="warn" style="padding:6px 14px 18px">Alat bantu analisis edukasi, bukan saran investasi. Widget © TradingView. Trading berisiko tinggi.</footer>
 <script>
 const SYM=[['USDJPY','FX:USDJPY',3,'USD/JPY','A'],['AUDUSD','FX:AUDUSD',5,'AUD/USD','A'],['EURJPY','FX:EURJPY',3,'EUR/JPY','A'],['NZDUSD','FX:NZDUSD',5,'NZD/USD','A'],['BTCUSD','BINANCE:BTCUSDT',1,'','A'],['ETHUSD','BINANCE:ETHUSDT',2,'','A'],
@@ -90,6 +93,39 @@ const act=()=>{const d=new Date(),h=d.getUTCHours()+d.getUTCMinutes()/60;return 
 function erOf(c,n){if(c.length<n+1)return 0;let p=0;for(let i=c.length-n;i<c.length;i++)p+=Math.abs(c[i].c-c[i-1].c);return p?Math.abs(c[c.length-1].c-c[c.length-1-n].c)/p:0}
 function chopOf(c,n){if(c.length<n+2)return 100;let s=0,hh=-1e18,ll=1e18;for(let i=c.length-n;i<c.length;i++){s+=Math.max(c[i].h-c[i].l,Math.abs(c[i].h-c[i-1].c),Math.abs(c[i].l-c[i-1].c));hh=Math.max(hh,c[i].h);ll=Math.min(ll,c[i].l)}return hh>ll?100*Math.log10(s/(hh-ll))/Math.log10(n):100}
 function qual(c,r,d,er0,ch0){const L=c.length,er=erOf(c,20),ch=chopOf(c,14),fl=r.evs.filter(e=>e.type==='CHoCH'&&e.k>=L-60).length;return{er,ch,fl,ok:r.trend===d&&er>=er0&&ch<=ch0&&fl<=G.flips}}
+/* ===== Technical Rating gaya TradingView: dihitung lokal dari candle asli yang SAMA dengan mesin SMC =====
+   MA: SMA/EMA 10-200 + Hull(9). Osilator: RSI, Stoch, CCI, ADX, AO, Momentum, MACD, Williams %R, Bull/Bear Power.
+   Tiap indikator memberi suara +1/0/-1; rating = rata-rata(MA, osilator). >=.5 Strong Buy, >=.1 Buy, <=-.1 Sell, <=-.5 Strong Sell. */
+const lab=x=>x>=.5?'STRONG BUY':x>=.1?'BUY':x<=-.5?'STRONG SELL':x<=-.1?'SELL':'NEUTRAL',LB={'STRONG BUY':'S.BUY','BUY':'BUY','NEUTRAL':'NTR','SELL':'SELL','STRONG SELL':'S.SELL'};
+const emaS=(a,p)=>{const k=2/(p+1);let e=a[0];const o=[e];for(let i=1;i<a.length;i++){e=a[i]*k+e*(1-k);o.push(e)}return o},
+ smaAt=(a,p,i)=>{let s=0;for(let k=i-p+1;k<=i;k++)s+=a[k];return s/p},
+ wmaAt=(a,p,i)=>{let s=0,w=0;for(let k=0;k<p;k++){s+=a[i-k]*(p-k);w+=p-k}return s/w};
+function rsiS(cl,p){const o=[];let g=0,l=0;for(let i=1;i<cl.length;i++){const d=cl[i]-cl[i-1],u=d>0?d:0,w=d<0?-d:0;if(i<=p){g+=u;l+=w;if(i===p){g/=p;l/=p;o[i]=l?100-100/(1+g/l):100}}else{g=(g*(p-1)+u)/p;l=(l*(p-1)+w)/p;o[i]=l?100-100/(1+g/l):100}}return o}
+function adxL(c,p){let tr=0,pd=0,md=0,adx=0,pdi=0,mdi=0;const dx=[];
+ for(let i=1;i<c.length;i++){const up=c[i].h-c[i-1].h,dn=c[i-1].l-c[i].l,T=Math.max(c[i].h-c[i].l,Math.abs(c[i].h-c[i-1].c),Math.abs(c[i].l-c[i-1].c)),P=up>dn&&up>0?up:0,M=dn>up&&dn>0?dn:0;
+  if(i<=p){tr+=T;pd+=P;md+=M}else{tr=tr-tr/p+T;pd=pd-pd/p+P;md=md-md/p+M}
+  if(i>=p&&tr>0){pdi=100*pd/tr;mdi=100*md/tr;const x=100*Math.abs(pdi-mdi)/((pdi+mdi)||1);dx.push(x);if(dx.length===p)adx=dx.reduce((a,b)=>a+b,0)/p;else if(dx.length>p)adx=(adx*(p-1)+x)/p}}
+ return{adx,pdi,mdi}}
+function hullL(cl){const L=cl.length,d=[];for(let i=L-3;i<L;i++)d.push(2*wmaAt(cl,4,i)-wmaAt(cl,9,i));return wmaAt(d,3,2)}
+function rate(c){const L=c.length;if(L<40)return null;const cl=c.map(b=>b.c),px=cl[L-1],v=(a,b)=>a>b?1:a<b?-1:0,ma=[],os=[];
+ for(const p of[10,20,30,50,100,200]){if(L>p)ma.push(v(px,smaAt(cl,p,L-1)));if(L>=2*p)ma.push(v(px,emaS(cl,p)[L-1]))}
+ ma.push(v(px,hullL(cl)));
+ const rs=rsiS(cl,14),r0=rs[L-1],r1=rs[L-2];os.push(r0<30&&r0>r1?1:r0>70&&r0<r1?-1:0);
+ const rk=i=>{let hh=-1e18,ll=1e18;for(let k=i-13;k<=i;k++){hh=Math.max(hh,c[k].h);ll=Math.min(ll,c[k].l)}return hh>ll?100*(cl[i]-ll)/(hh-ll):50},kS=i=>(rk(i)+rk(i-1)+rk(i-2))/3,K=kS(L-1),Dd=(kS(L-1)+kS(L-2)+kS(L-3))/3;
+ os.push(K<20&&Dd<20&&K>Dd?1:K>80&&Dd>80&&K<Dd?-1:0);
+ const tp=c.map(b=>(b.h+b.l+b.c)/3),cci=i=>{const m=smaAt(tp,20,i);let d=0;for(let k=i-19;k<=i;k++)d+=Math.abs(tp[k]-m);d/=20;return d?(tp[i]-m)/(.015*d):0},c0=cci(L-1),c1=cci(L-2);
+ os.push(c0<-100&&c0>c1?1:c0>100&&c0<c1?-1:0);
+ const ax=adxL(c,14);os.push(ax.adx>20&&ax.pdi>ax.mdi?1:ax.adx>20&&ax.pdi<ax.mdi?-1:0);
+ const mp=c.map(b=>(b.h+b.l)/2),ao=i=>smaAt(mp,5,i)-smaAt(mp,34,i),a0=ao(L-1),a1=ao(L-2);os.push(a0>0&&a0>a1?1:a0<0&&a0<a1?-1:0);
+ os.push(v(cl[L-1]-cl[L-11],cl[L-2]-cl[L-12]));
+ const e12=emaS(cl,12),e26=emaS(cl,26),mc=e12.map((x,i)=>x-e26[i]),sgl=emaS(mc,9);os.push(v(mc[L-1],sgl[L-1]));
+ const wr=i=>{let hh=-1e18,ll=1e18;for(let k=i-13;k<=i;k++){hh=Math.max(hh,c[k].h);ll=Math.min(ll,c[k].l)}return hh>ll?-100*(hh-cl[i])/(hh-ll):-50},w0=wr(L-1),w1=wr(L-2);
+ os.push(w0<-80&&w0>w1?1:w0>-20&&w0<w1?-1:0);
+ const e13=emaS(cl,13),bu=i=>c[i].h-e13[i],be=i=>c[i].l-e13[i];
+ os.push(e13[L-1]>e13[L-2]&&be(L-1)<0&&be(L-1)>be(L-2)?1:e13[L-1]<e13[L-2]&&bu(L-1)>0&&bu(L-1)<bu(L-2)?-1:0);
+ const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0,rm=avg(ma),ro=avg(os),all=(rm+ro)/2,vt=ma.concat(os);
+ return{ma:rm,osc:ro,all,lb:lab(all),b:vt.filter(x=>x>0).length,s:vt.filter(x=>x<0).length,n:vt.filter(x=>x===0).length,nm:ma.length,no:os.length}}
+function rateAll(h,m,f){const r={h1:rate(h),m15:rate(m),m5:rate(f)};let s=0,w=0;[[r.h1,.25],[r.m15,.4],[r.m5,.35]].forEach(([x,k])=>{if(x){s+=x.all*k;w+=k}});r.all=w?s/w:0;r.lb=lab(r.all);return r}
 function sig(v){const c=v.cand,g=v.guard;if(g&&!g.ok)return'DATA?';if(g&&!g.scan)return c?'STALE':'—';if(!c)return'—';let b;if(!SAFE)b=c.conf&&v.sc>=70?(c.d>0?'BUY':'SELL'):'WATCH';else{const gt=v.gate;b=gt&&gt.ok&&v.sc>=70?(c.d>0?'BUY':'SELL'):c.conf?'SKIP':'WATCH'}return(b==='BUY'||b==='SELL')&&g&&!g.fresh?b+'?':b}
 const pp=(c,s)=>PIP[s]?` · SL ${(Math.abs(c.entry-c.sl)/PIP[s]).toFixed(1)} pip / TP ${(Math.abs(c.tp-c.entry)/PIP[s]).toFixed(1)} pip`:'';
 function tick(){for(const q of SYM){const s=q[0],c5=D[s].c5;if(c5.length<80){V[s]=null;continue}
@@ -100,7 +136,7 @@ function tick(){for(const q of SYM){const s=q[0],c5=D[s].c5;if(c5.length<80){V[s
  let gate=null;if(cand){const own=cand===A.m15.setup?A.m15:A.m5,q15=qual(m15,A.m15,cand.d,G.er,G.chop),q5=qual(c5.slice(-400),A.m5,cand.d,G.er5,G.chop5),rk=Math.abs(cand.entry-cand.sl)/own.atr,al=A.h1.trend===cand.d&&A.m15.trend===cand.d&&A.m5.trend===cand.d;
   const chk=[['Data asli (Data Guard, umur '+Math.round(guardNow.age)+' mnt)',guardNow.ok&&guardNow.scan],['Searah 1H · 15M · 5M',al],['Tren bersih 15M (ER '+q15.er.toFixed(2)+' ≥ '+G.er+', CHOP '+q15.ch.toFixed(0)+' ≤ '+G.chop+')',q15.er>=G.er&&q15.ch<=G.chop],['Tren bersih 5M (ER '+q5.er.toFixed(2)+' ≥ '+G.er5+', CHOP '+q5.ch.toFixed(0)+' ≤ '+G.chop5+')',q5.er>=G.er5&&q5.ch<=G.chop5],['Tidak bolak-balik (CHoCH 15M '+q15.fl+' ≤ '+G.flips+' dalam 60 bar)',q15.fl<=G.flips],['Sesi utama ticker sedang aktif',on],['SL ketat ('+rk.toFixed(2)+' ≤ '+G.maxSL+' ATR)',rk<=G.maxSL],['Konfirmasi candle terbentuk',cand.conf]];
   gate={chk,ok:chk.every(x=>x[1])}}
- V[s]={key,gate,guard:guardNow,c:{h1,m15,m5:c5},A,cand,on,sc:cand?Math.min(100,cand.score+(cand.d===A.h1.trend?10:0)+(on?5:0)):0,pct:(c5.at(-1).c/c5[Math.max(0,c5.length-289)].c-1)*100,age:(Date.now()-c5.at(-1).t)/6e4}}}
+ V[s]={key,gate,guard:guardNow,c:{h1,m15,m5:c5},A,cand,on,R:rateAll(h1,m15,c5),catr:cand?(cand===A.m15.setup?A.m15.atr:A.m5.atr):0,sc:cand?Math.min(100,cand.score+(cand.d===A.h1.trend?10:0)+(on?5:0)):0,pct:(c5.at(-1).c/c5[Math.max(0,c5.length-289)].c-1)*100,age:(Date.now()-c5.at(-1).t)/6e4}}}
 const CFG=(()=>{try{return JSON.parse(localStorage.getItem('smccfg'))||{}}catch(e){return{}}})();if(CFG.bn===undefined)CFG.bn=true;SAFE=CFG.safe!==false;RRV=SAFE?1.5:2.5;
 const saveCfg=()=>{try{localStorage.setItem('smccfg',JSON.stringify(CFG))}catch(e){}};
 const YH={USDJPY:'USDJPY=X',AUDUSD:'AUDUSD=X',EURJPY:'EURJPY=X',NZDUSD:'NZDUSD=X',BTCUSD:'BTC-USD',ETHUSD:'ETH-USD',EURUSD:'EURUSD=X',GBPUSD:'GBPUSD=X',USDCHF:'USDCHF=X',EURGBP:'EURGBP=X',XAUUSD:'XAUUSD=X',XAGUSD:'XAGUSD=X',DXY:'DX-Y.NYB',SPY:'SPY',QQQ:'QQQ',DIA:'DIA',GLD:'GLD',AAPL:'AAPL',NVDA:'NVDA',TSLA:'TSLA'};
@@ -161,7 +197,7 @@ function sched(){const ac=act(),now=Date.now();
 function updAF(){const b=$('#af');b.textContent='AUTO-FOLLOW: '+(AUTO?'ON':'OFF');b.classList.toggle('on',AUTO)}
 function visible(){const A=act();let L=SYM.map(q=>q[0]);if(flt==='AUTO'&&A.length)L=SYM.filter(q=>A.includes(q[4])).map(q=>q[0]);else if('ALN'.includes(flt)&&flt!=='AUTO')L=SYM.filter(q=>q[4]===flt).map(q=>q[0]);const gk=s=>V[s]&&V[s].gate&&V[s].gate.ok?1:0;return L.sort((a,b)=>(SAFE?gk(b)-gk(a):0)||(V[b]?V[b].sc:-1)-(V[a]?V[a].sc:-1))}
 function watch(){for(const q of SYM){const s=q[0],v=V[s],k=v&&(sig(v)==='BUY'||sig(v)==='SELL')?v.cand.d+':'+v.cand.entry.toFixed(5):'';
-  if(k&&PREV[s]!==k){LOG.unshift({t:new Date().toUTCString().slice(17,25),s,d:v.cand.d,sc:v.sc});LOG.length=Math.min(LOG.length,8)}PREV[s]=k}
+  if(k&&PREV[s]!==k){LOG.unshift({t:new Date().toUTCString().slice(17,25),s,d:v.cand.d,sc:v.sc,y:(syncOf(s)||{}).rank===0});LOG.length=Math.min(LOG.length,8)}PREV[s]=k}
  if(AUTO&&Date.now()-lastSw>6e4){const L=visible().filter(s=>V[s]&&V[s].cand&&V[s].sc>=60&&(!SAFE||(V[s].gate&&V[s].gate.ok))),t=L[0];
   if(t&&t!==sel&&(!V[sel]||!V[sel].cand||V[sel].sc<V[t].sc)){sel=t;ST[t].last=0;lastSw=Date.now();loadTV()}}}
 function draw(cv,c,r,lab,dec){const dp=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(W<50)return;cv.width=W*dp;cv.height=H*dp;const x=cv.getContext('2d');x.scale(dp,dp);
@@ -179,10 +215,46 @@ function draw(cv,c,r,lab,dec){const dp=devicePixelRatio||1,W=cv.clientWidth,H=cv
  x.fillStyle='#d7deea';x.font='bold 12px system-ui';x.fillText(lab+'  '+(r.trend>0?'▲ Bullish':r.trend<0?'▼ Bearish':'— Netral')+(s?'  ['+s.status+']':''),8,14)}
 const fm=(s,p)=>p.toFixed(SYM.find(q=>q[0]===s)[2]);
 const tvs=s=>SYM.find(q=>q[0]===s)[1];
+/* ===== SYNC: Technical Rating (arah umum) × SMC valid (titik entry nyata) ===== */
+const rBadge=r=>r?`<span class="rb ${r.all>=.1?'up':r.all<=-.1?'dn':'no'}" title="MA ${r.ma.toFixed(2)} · Osilator ${r.osc.toFixed(2)} · skor ${r.all.toFixed(2)}">${LB[r.lb]}</span>`:'<span class="rb no" title="data kurang">–</span>';
+function syncOf(s){const v=V[s];if(!v||!v.R)return null;
+ const R=v.R,rd=R.all>=.1?1:R.all<=-.1?-1:0,gd=v.guard||guard(s),c=v.cand,sg=sig(v),base=sg.replace('?',''),dn=rd>0?'BUY':rd<0?'SELL':'NETRAL',px=D[s].c5.at(-1).c,
+  o={s,v,R,rd,gd,c,sg,px,side:'',vd:'',cls:'vno',rank:9,msg:'',lv:false,dtx:'–',ent:null,sl:null,tp:null,rr:null,et:''};
+ if(!gd.ok){o.vd='DATA TIDAK VALID';o.rank=10;o.msg='Data Guard gagal – tidak ada panduan entry.';return o}
+ if(!gd.scan){o.vd='DATA BASI';o.rank=10;o.msg='Feed tertunda atau pasar tutup – rating & SMC tidak dipakai.';return o}
+ if(!c){o.rank=8;if(rd){o.vd='RATING '+dn+' ≠ ENTRY';o.cls='vwt';o.msg='Technical Rating '+R.lb+' hanya bias arah umum, BUKAN titik entry. Belum ada CHoCH + OB/FVG valid di 15M/5M → tunggu setup SMC, jangan entry hanya karena rating.'}else{o.vd='TIDAK ADA SETUP';o.msg='Rating netral dan belum ada setup SMC valid.'}return o}
+ const d=c.d,zn=c.zn||c.ob,atr=v.catr||1e-9,side=d>0?'BUY':'SELL',away=d>0?px-zn.hi:zn.lo-px,below=d>0?zn.lo-px:px-zn.hi,rng=fm(s,zn.lo)+'–'+fm(s,zn.hi);
+ o.side=side;o.dtx=away>0?(away/atr).toFixed(1)+' ATR '+(d>0?'di atas':'di bawah')+' zona':below>0?(below/atr).toFixed(1)+' ATR '+(d>0?'di bawah':'di atas')+' zona':'di dalam zona';
+ o.ent=c.entry;o.sl=c.sl;o.tp=c.tp;o.rr=c.rr;
+ const moved=(px-c.entry)*d,late=c.conf&&moved>.6*atr,clr=()=>{o.ent=o.sl=o.tp=o.rr=null};
+ if((px-c.sl)*d<=0){o.vd='SETUP GAGAL';o.rank=9;o.cls='vbad';o.msg='Harga sudah menembus SL setup – abaikan, tunggu CHoCH baru.';clr();return o}
+ if(c.conf&&(px-c.tp)*d>=0){o.vd='TARGET TERCAPAI';o.rank=9;o.msg='Target setup sudah tersentuh – jangan kejar.';clr();return o}
+ if(rd&&rd!==d){o.vd='KONFLIK';o.rank=7;o.cls='vbad';o.msg='Rating '+dn+' melawan SMC '+side+'. Jangan entry; tunggu rating dan struktur searah.';clr();return o}
+ const same=rd===d,tag=same?'Rating '+dn+' & SMC searah':'Rating netral, SMC '+side;
+ if(base===side&&c.conf){
+  if(sg.endsWith('?')){o.vd='MENUNGGU DATA SEGAR';o.rank=5;o.cls='vwt';o.et='ref';o.msg=tag+'. Level hanya referensi sampai label sinyal tanpa tanda tanya.'}
+  else if(late){o.vd='JANGAN KEJAR';o.rank=2;o.cls='vwt';o.ent=d>0?zn.hi:zn.lo;o.et='re-entry';o.rr=Math.abs(c.tp-o.ent)/Math.abs(o.ent-c.sl);o.msg=tag+', tetapi harga sudah '+(moved/atr).toFixed(1)+' ATR dari entry awal. Tunggu pullback ke tepi zona '+fm(s,o.ent)+' lalu konfirmasi ulang.'}
+  else{o.vd=same?'ENTRY VALID · SYNC':'ENTRY VALID · SMC';o.rank=same?0:1;o.cls='vok';o.lv=true;o.et='sekarang';o.msg=tag+'. '+side+' di '+fm(s,c.entry)+' · SL '+fm(s,c.sl)+' · TP '+fm(s,c.tp)+'.'+(same?'':' Rating belum mendukung, pakai ukuran kecil.')}
+ }else if(c.conf){const why=(v.gate&&SAFE&&!v.gate.ok)?v.gate.chk.filter(x=>!x[1]).map(x=>x[0].replace(/ \(.*$/,'')).join('; '):'skor '+v.sc+' < 70';o.vd='SKIP · FILTER';o.rank=6;o.msg=tag+'. Konfirmasi ada tetapi tidak lolos: '+why+'.';clr()}
+ else if(c.status==='RETEST'){o.vd='TUNGGU KONFIRMASI';o.rank=3;o.cls='vwt';o.et='limit';o.msg=tag+'. Harga sudah di zona '+rng+'; entry hanya setelah candle konfirmasi (engulf/rejection) – belum terbentuk.'}
+ else{o.vd='TUNGGU RETEST';o.rank=4;o.cls='vwt';o.et='limit';o.msg=tag+'. Pasang alert di zona '+rng+' (harga '+o.dtx+'). Jangan kejar harga sekarang.'}
+ return o}
+let SYO=false;
+function renderSync(){const tb=$('#syt');if(!tb)return;
+ const A0=visible().map(s=>syncOf(s)).filter(Boolean),rdy=A0.filter(o=>o.rank<=1).length;let L=A0;
+ if(SYO)L=L.filter(o=>o.rank<=1);
+ L.sort((a,b)=>a.rank-b.rank||b.v.sc-a.v.sc);
+ $('#sycnt').textContent=rdy+' siap entry · '+A0.length+' ticker';
+ const hd='<tr><th>Ticker</th><th>Harga</th><th>TV Technical Rating<small>1H · 15M · 5M · gabungan</small></th><th>Bias SMC<small>1H · 15M · 5M</small></th><th>Sinyal SMC</th><th>Zona entry</th><th>Entry</th><th>SL</th><th>TP</th><th>RR</th><th>Jarak harga</th><th>SYNC · panduan entry</th></tr>';
+ const rows=L.map(o=>{const s=o.s,v=o.v,c=o.c,zn=c&&(c.zn||c.ob),sg=o.sg,sc=sg.startsWith('BUY')?'up':sg.startsWith('SELL')?'dn':'',
+  ar=[v.A.h1,v.A.m15,v.A.m5].map(r=>r.trend>0?'<span class="up">▲</span>':r.trend<0?'<span class="dn">▼</span>':'<span class="no">–</span>').join(' '),
+  lv=x=>x!=null?fm(s,x):'–';
+  return`<tr data-s="${s}" class="${s===sel?'sel':''}"><td style="text-align:left"><b>${s}</b><small>${D[s].src} · ${Math.round(v.age)} mnt</small></td><td>${fm(s,o.px)}<small class="${v.pct>=0?'up':'dn'}">${v.pct.toFixed(2)}%</small></td><td>${rBadge(o.R.h1)} ${rBadge(o.R.m15)} ${rBadge(o.R.m5)} <span class="rb ${o.R.all>=.1?'up':o.R.all<=-.1?'dn':'no'}">${o.R.lb}</span></td><td>${ar}</td><td class="${sc}"><b>${sg}</b><small>${c?c.status+' · ':''}${v.sc}/100</small></td><td>${zn?fm(s,zn.lo)+' – '+fm(s,zn.hi):'–'}</td><td>${lv(o.ent)}${o.et?'<small>'+o.et+'</small>':''}</td><td class="dn">${lv(o.sl)}</td><td class="up">${lv(o.tp)}</td><td>${o.rr!=null?'1:'+o.rr.toFixed(1):'–'}</td><td>${o.dtx}</td><td class="w"><b class="${o.cls}">${o.side?'<span class="rb '+(o.side==='BUY'?'up':'dn')+'">'+o.side+'</span> ':''}${o.vd}</b><small>${o.msg}</small></td></tr>`}).join('');
+ tb.innerHTML='<thead>'+hd+'</thead><tbody>'+(rows||'<tr><td colspan="12" class="warn">'+(A0.length?'Belum ada ticker yang siap entry (filter aktif).':'Menunggu data candle asli…')+'</td></tr>')+'</tbody>'}
 function renderList(){const L=visible();
  $('#list').innerHTML=L.map(s=>{const v=V[s];if(!v)return`<div class="row dim ${s===sel?'sel':''}" data-s="${s}"><b>${s}<small>${tvs(s)}</small></b><span class="warn">${D[s].c5.length?'memuat…':'no data'}</span><span></span></div>`;
-  const c=v.cand,sg=sig(v);
-  return`<div class="row ${s===sel?'sel':''} ${v.on?'':'dim'}" data-s="${s}"><b>${s}<small>${D[s].src}${v.age>(D[s].src==='FILE·GitHub'?40:20)?' · STALE':''}</small></b><span>${fm(s,D[s].c5.at(-1).c)}<small class="${v.pct>=0?'up':'dn'}">${v.pct.toFixed(2)}%</small></span><span class="sig ${sg.startsWith('BUY')?'up':sg.startsWith('SELL')?'dn':''}">${sg}<small>${v.sc}/100</small></span></div>`}).join('')}
+  const c=v.cand,sg=sig(v),sy=syncOf(s);
+  return`<div class="row ${s===sel?'sel':''} ${v.on?'':'dim'}" data-s="${s}"><b>${s}<small>${D[s].src}${v.age>(D[s].src==='FILE·GitHub'?40:20)?' · STALE':''} · TV ${LB[v.R.lb]}</small></b><span>${fm(s,D[s].c5.at(-1).c)}<small class="${v.pct>=0?'up':'dn'}">${v.pct.toFixed(2)}%</small></span><span class="sig ${sg.startsWith('BUY')?'up':sg.startsWith('SELL')?'dn':''}">${sg}<small>${v.sc}/100${sy&&sy.rank===0?' · SYNC✓':''}</small></span></div>`}).join('')}
 function ck(o,t){return`<td class="${o?'ok':'no'}">${o?'✓ ':'– '}${t||''}</td>`}
 function renderAna(){const s=sel,v=V[s],d=SYM.find(q=>q[0]===s)[2],pr=SYM.find(q=>q[0]===s)[4],A=act(),now=new Date();
  const T=[['1H',v.A.h1],['15M',v.A.m15],['5M',v.A.m5]],lastEv=r=>{const e=r.evs.at(-1);return e?e.type+(e.dir>0?' ↑':' ↓'):'-'};
@@ -193,6 +265,8 @@ function renderAna(){const s=sel,v=V[s],d=SYM.find(q=>q[0]===s)[2],pr=SYM.find(q
  if(c)plan=`<p><b class="${c.d>0?'up':'dn'}">${c.d>0?'BUY':'SELL'}</b> (${c.conf?'konfirmasi sudah terbentuk':'limit/tunggu retest'}) · Entry <b>${c.entry.toFixed(d)}</b> · SL <b>${c.sl.toFixed(d)}</b> · TP <b>${c.tp.toFixed(d)}</b> · RR 1:${c.rr}${pp(c,s)}</p><p>Zona entry ${(c.zn||c.ob).lo.toFixed(d)}–${(c.zn||c.ob).hi.toFixed(d)} (OB ${c.ob.lo.toFixed(d)}–${c.ob.hi.toFixed(d)})${c.fvg?` · FVG ${c.fvg.lo.toFixed(d)}–${c.fvg.hi.toFixed(d)}${c.ovl?' (overlap OB = confluence kuat)':''}`:''}. Invalidasi: close menembus ${c.d>0?'bawah':'atas'} OB. Risiko disarankan ≤${SAFE?'0,5':'1'}% ekuitas${SAFE?', ambil target cepat, jangan digeser':''}.</p>`;
  const gd=v.guard||guard(s),lb=D[s].c5[D[s].c5.length-1],gt=v.gate,allowed=gd.ok&&gd.fresh&&(!SAFE||(gt&&gt.ok&&v.sc>=70));
  const gdTxt=(gd.ok&&gd.fresh?'<span class="ok">✅ Data Guard: data asli &amp; segar</span>':gd.ok?'<span class="no">⚠ Data Guard: data asli tetapi belum segar – rekomendasi ditahan</span>':'<span class="dn">⛔ Data Guard GAGAL – rekomendasi diblokir</span>')+' · sumber '+D[s].src+' · '+D[s].c5.length+' candle · candle terakhir '+new Date(lb.t).toUTCString().slice(5,22)+' UTC ('+Math.round(gd.age)+' mnt lalu)'+(gd.f.length||gd.w.length?' · '+gd.f.concat(gd.w).join('; '):'');
+ const sy=syncOf(s),RR=v.R,rrow=(n,r)=>r?`<tr><td>${n}</td><td>${r.ma.toFixed(2)} <small class="warn">(${r.nm})</small></td><td>${r.osc.toFixed(2)} <small class="warn">(${r.no})</small></td><td>${r.all.toFixed(2)}</td><td>${rBadge(r)}</td><td class="ok">${r.b}</td><td class="no">${r.n}</td><td class="dn">${r.s}</td></tr>`:`<tr><td>${n}</td><td colspan="7" class="no">data belum cukup</td></tr>`,
+ synHtml=sy?`<table><tr><th>TF</th><th>MA (jml)</th><th>Osilator (jml)</th><th>Skor</th><th>Rating</th><th>Buy</th><th>Netral</th><th>Sell</th></tr>${rrow('1H',RR.h1)}${rrow('15M',RR.m15)}${rrow('5M',RR.m5)}</table><p>Rating gabungan: <b>${RR.lb}</b> (${RR.all.toFixed(2)}; bobot 1H 25% · 15M 40% · 5M 35%) → SMC: <b>${sy.sg}</b>${sy.c?' ('+sy.c.status+')':''}. <b class="${sy.cls}">${sy.side?sy.side+' · ':''}${sy.vd}</b> – ${sy.msg}</p><p class="warn">Rating = arah umum dari indikator; titik entry hanya berasal dari zona SMC (OB/FVG) yang sudah di-retest dan dikonfirmasi. Gauge TradingView resmi ditampilkan di atas untuk perbandingan visual; angka kecil bisa berbeda karena panjang data &amp; pembulatan.</p>`:'';
  let verdict='';
  if(SAFE)verdict=!c?'<p class="warn">Mode SAFE SCALP aktif. Belum ada setup; tunggu pasar membentuk tren bersih.</p>':`<p>${allowed?'<b class="up">✅ BOLEH ENTRY</b> – tren bersih dan semua syarat terpenuhi.':(gd.ok&&!gd.fresh&&gt&&gt.ok&&v.sc>=70)?'<b class="no">⏳ MENUNGGU DATA SEGAR</b> – kandidat lolos filter, harga sedang diperbarui. Jangan entry sebelum label berubah menjadi BUY/SELL tanpa tanda tanya.':'<b class="dn">⛔ JANGAN ENTRY</b> – '+(gt.chk.filter(x=>!x[1]).map(x=>x[0]).join('; ')||'skor < 70')+'.'}</p><table><tr><th>Syarat Safe Scalp</th><th>Status</th></tr>${gt.chk.map(x=>`<tr><td style="text-align:left">${x[0]}</td>${ck(x[1],'')}</tr>`).join('')}</table>`;
  if(c&&!allowed)plan='<p class="warn">Level referensi saja (belum aman untuk entry):</p>'+plan;
@@ -207,8 +281,9 @@ function renderAna(){const s=sel,v=V[s],d=SYM.find(q=>q[0]===s)[2],pr=SYM.find(q
  <tr><td>Retest POI</td>${cell(s=>ck(s&&s.touch>=0,s&&s.status))}</tr>
  <tr><td>Konfirmasi candle</td>${cell(s=>ck(s&&s.conf,s&&s.conf?'engulf/rejection':''))}</tr>
  <tr><td>Skor</td>${cell(s=>`<td>${s?s.score:0}</td>`)}</tr></table>
- <h3>3. Keputusan & Rencana Entry</h3>${verdict}${plan}<p>Bias 1H: <b>${v.A.h1.trend>0?'Bullish':v.A.h1.trend<0?'Bearish':'Netral'}</b> · ${c?(al?'<span class="ok">searah HTF (A+ setup)</span>':'<span class="dn">melawan HTF, kurangi ukuran/skip</span>'):''} · Skor total ${v.sc}/100.</p>
- <h3>4. Backtest (±5 hari data, RR 1:${RRV}, ${SAFE?'hanya setup yang lolos filter tren bersih':'semua setup'})</h3><table><tr><th>TF</th><th>Trade</th><th>Win</th><th>Avg</th><th>Total</th><th>PF</th></tr>${btR}</table>
+ <h3>3. Technical Rating × SMC (sinkron)</h3>${synHtml}
+ <h3>4. Keputusan & Rencana Entry</h3>${verdict}${plan}<p>Bias 1H: <b>${v.A.h1.trend>0?'Bullish':v.A.h1.trend<0?'Bearish':'Netral'}</b> · ${c?(al?'<span class="ok">searah HTF (A+ setup)</span>':'<span class="dn">melawan HTF, kurangi ukuran/skip</span>'):''} · Skor total ${v.sc}/100.</p>
+ <h3>5. Backtest (±5 hari data, RR 1:${RRV}, ${SAFE?'hanya setup yang lolos filter tren bersih':'semua setup'})</h3><table><tr><th>TF</th><th>Trade</th><th>Win</th><th>Avg</th><th>Total</th><th>PF</th></tr>${btR}</table>
  <p class="warn">Backtest memakai candle 5M asli dari feed (Binance ±3,5 hari, Yahoo ±10 hari, Twelve Data ±5 hari). Hasil masa lalu tidak menjamin masa depan. Bukan saran investasi.</p>`}
 function runBT(){const b=BT[sel];if(b&&Date.now()-b.t<9e4)return;BT[sel]={t:Date.now(),res:null};const s=sel;setTimeout(()=>{const c=V[s].c;BT[s].res={h1:bt(c.h1),m15:bt(c.m15),m5:bt(c.m5,true)}},50)}
 function frame(){try{frame0()}catch(e){console.error(e)}}
@@ -217,8 +292,8 @@ function frame0(){tick();watch();if(Date.now()-lastSave>6e4){lastSave=Date.now()
  const n=new Date();$('#clk').textContent='UTC '+n.toUTCString().slice(17,25)+' · WIB '+new Date(n.getTime()+252e5).toUTCString().slice(17,25);
  const nl=SYM.filter(q=>V[q[0]]).length,bz=SYM.filter(q=>ST[q[0]].busy).length;$('#feed').textContent='SMC scan '+nl+'/20 · segar '+SYM.filter(q=>V[q[0]]&&V[q[0]].guard&&V[q[0]].guard.ok&&V[q[0]].guard.fresh).length+(CFG.key?' · TD '+TDQ.n+'/'+(CFG.tdMax||760):'')+' · '+n.toUTCString().slice(17,25)+(bz?' · ↻'+bz:'')+(FL.upd?' · data.json '+Math.round((Date.now()/1000-FL.upd)/60)+' mnt':'')+(WK.err?' · '+WK.err:'')+(TDERR?' · TD: '+TDERR:'');
  $('#setn').textContent=nl;$('#setup').style.display=nl<18&&Date.now()-T0>15e3&&!WK.busy?'block':'none';
- renderList();
- $('#log').innerHTML=LOG.length?LOG.map(x=>`<div style="display:grid;grid-template-columns:62px 1fr auto;gap:4px;padding:3px 6px"><span class="warn">${x.t}</span><b class="${x.d>0?'up':'dn'}">${x.d>0?'BUY':'SELL'} ${x.s}</b><span class="warn">${x.sc}</span></div>`).join(''):'<span class="warn">Menunggu sinyal terkonfirmasi (skor ≥70)…</span>';
+ renderList();renderSync();
+ $('#log').innerHTML=LOG.length?LOG.map(x=>`<div style="display:grid;grid-template-columns:62px 1fr auto;gap:4px;padding:3px 6px"><span class="warn">${x.t}</span><b class="${x.d>0?'up':'dn'}">${x.d>0?'BUY':'SELL'} ${x.s}${x.y?' ✓SYNC':''}</b><span class="warn">${x.sc}</span></div>`).join(''):'<span class="warn">Menunggu sinyal terkonfirmasi (skor ≥70)…</span>';
  if(!v){$('#ana').innerHTML='<b style="font-size:15px">'+sel+'</b><p>Mengambil data otomatis'+(ST[sel].err?' · '+ST[sel].err+' (mencoba lagi)':'')+'… Jika terus gagal, isi Proxy/Twelve Data key di ⚙ Data.</p><p class="warn">Chart TradingView di atas tetap real-time.</p>';return}
  [['h1','1H'],['m15','15M'],['m5','5M']].forEach(([k,l])=>draw($('#cv'+k),v.c[k],v.A[k],l,dec));runBT();renderAna()}
 $('#tabs').innerHTML=[['AUTO','Auto (sesi aktif)'],['A','Asia'],['L','London'],['N','New York'],['ALL','Semua']].map(([k,l])=>`<button data-f="${k}">${l}</button>`).join('');
@@ -227,10 +302,17 @@ $('#tabs').onclick=e=>{if(e.target.dataset.f){flt=e.target.dataset.f;[...$('#tab
 $('#tabs').children[0].classList.add('on');
 $('#list').onclick=e=>{const r=e.target.closest('.row');if(r){sel=r.dataset.s;ST[sel].last=0;AUTO=false;updAF();loadTV()}};
 function tvEmbed(el,file,cfg){el.innerHTML='';const w=document.createElement('div');w.className='tradingview-widget-container';w.style.height='100%';const i=document.createElement('div');i.className='tradingview-widget-container__widget';i.style.height='100%';w.appendChild(i);const sc=document.createElement('script');sc.src='https://s3.tradingview.com/external-embedding/'+file;sc.async=true;sc.text=JSON.stringify(cfg);w.appendChild(sc);el.appendChild(w)}
-function loadTV(){const sy=tvs(sel);[['h1','60'],['m15','15'],['m5','5']].forEach(([k,iv])=>tvEmbed($('#tv_'+k),'embed-widget-advanced-chart.js',{autosize:true,symbol:sy,interval:iv,timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',backgroundColor:'#131a26',hide_side_toolbar:true,allow_symbol_change:false,save_image:false,calendar:false,support_host:'https://www.tradingview.com'}))}
-function loadScr(m){tvEmbed($('#scr'),'embed-widget-screener.js',{width:'100%',height:520,defaultColumn:'overview',defaultScreen:'general',market:m,showToolbar:true,colorTheme:'dark',locale:'en'})}
+function loadTA(sy){[['h1','1h'],['m15','15m'],['m5','5m']].forEach(([k,iv])=>tvEmbed($('#ta_'+k),'embed-widget-technical-analysis.js',{interval:iv,width:'100%',isTransparent:true,height:'100%',symbol:sy,showIntervalTabs:false,displayMode:'single',locale:'en',colorTheme:'dark'}))}
+function loadTV(){const sy=tvs(sel);loadTA(sy);[['h1','60'],['m15','15'],['m5','5']].forEach(([k,iv])=>tvEmbed($('#tv_'+k),'embed-widget-advanced-chart.js',{autosize:true,symbol:sy,interval:iv,timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',backgroundColor:'#131a26',hide_side_toolbar:true,allow_symbol_change:false,save_image:false,calendar:false,support_host:'https://www.tradingview.com'}))}
+let SCM='forex',SCC='overview';
+function loadScr(m){if(m)SCM=m;tvEmbed($('#scr'),'embed-widget-screener.js',{width:'100%',height:520,defaultColumn:SCC,defaultScreen:'general',market:SCM,showToolbar:true,colorTheme:'dark',locale:'en'})}
 $('#stabs').innerHTML=['forex','crypto','america','cfd'].map(m=>`<button data-m="${m}">${m}</button>`).join('');
 $('#stabs').onclick=e=>{if(e.target.dataset.m){loadScr(e.target.dataset.m);[...$('#stabs').children].forEach(b=>b.classList.toggle('on',b===e.target))}};
+$('#ctabs').innerHTML=[['overview','Overview + Tech Rating'],['oscillators','Oscillators'],['moving_averages','Moving Averages'],['performance','Performance']].map(([k,l])=>`<button data-c="${k}">${l}</button>`).join('');
+$('#ctabs').onclick=e=>{if(e.target.dataset.c){SCC=e.target.dataset.c;loadScr();[...$('#ctabs').children].forEach(b=>b.classList.toggle('on',b===e.target))}};
+$('#ctabs').children[0].classList.add('on');
+$('#syo').onclick=()=>{SYO=!SYO;$('#syo').textContent='Hanya siap entry: '+(SYO?'ON':'OFF');$('#syo').classList.toggle('on',SYO)};
+$('#syt').onclick=e=>{const r=e.target.closest('tr[data-s]');if(r){sel=r.dataset.s;ST[sel].last=0;AUTO=false;updAF();loadTV()}};
 $('#vw').innerHTML=[['both','TV + SMC'],['tv','TradingView'],['smc','SMC Engine']].map(([k,l])=>`<button class="pill btn" data-v="${k}">${l}</button>`).join(' ');
 $('#vw').onclick=e=>{if(e.target.dataset.v){document.body.dataset.view=e.target.dataset.v;[...$('#vw').children].forEach(b=>b.classList.toggle('on',b===e.target))}};
 document.body.dataset.view='both';$('#vw').children[0].classList.add('on');
