@@ -1,0 +1,255 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SMC × TradingView Scanner</title><meta name="description" content="Smart Money Concepts live scanner: CHoCH, FVG, Order Block, confirmation, backtest"><meta name="theme-color" content="#0b0f17"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0f17'/%3E%3Cpath d='M5 22l7-8 5 4 10-11' stroke='%2326a69a' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#0b0f17;--p:#131a26;--b:#232d3f;--t:#d7deea;--m:#7b879c;--g:#26a69a;--r:#ef5350;--y:#f5b73b;--bl:#4c8dff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--b)}
+h1{font-size:16px;margin:0 8px 0 0}.pill{padding:3px 9px;border:1px solid var(--b);border-radius:99px;color:var(--m);font-size:12px}
+.pill.on{color:#fff;background:#1e3a8a;border-color:var(--bl)}.pill.ov{background:#7c2d12;border-color:var(--y);color:#fff}
+.app{display:grid;grid-template-columns:310px 1fr;gap:10px;padding:10px}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+.box{background:var(--p);border:1px solid var(--b);border-radius:8px;padding:8px}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}.tabs button{background:none;border:1px solid var(--b);color:var(--m);border-radius:6px;padding:4px 7px;cursor:pointer;font-size:11px}.tabs button.on{color:#fff;border-color:var(--bl);background:#1e3a8a}
+.row{display:grid;grid-template-columns:70px 1fr 64px;gap:4px;padding:6px;border-radius:6px;cursor:pointer;align-items:center}
+.row:hover,.row.sel{background:#1b2638}.row small{color:var(--m);display:block}.dim{opacity:.45}
+.sig{font-weight:700;text-align:right}.up{color:var(--g)}.dn{color:var(--r)}
+.charts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:1250px){.charts{grid-template-columns:1fr}}
+canvas{width:100%;height:270px;display:block}
+table{border-collapse:collapse;width:100%;margin:6px 0}td,th{border:1px solid var(--b);padding:5px 7px;text-align:center}th{color:var(--m);font-weight:500}
+.ok{color:var(--g)}.no{color:var(--m)}h3{margin:10px 0 4px;font-size:13px;color:var(--y)}p{margin:4px 0;line-height:1.5}.warn{color:var(--m);font-size:11px}.tvw{height:330px;margin-bottom:6px}body[data-view=tv] canvas{display:none}body[data-view=smc] .tvw{display:none}.btn{cursor:pointer;background:none}
+</style></head><body>
+<header><h1>SMC × TradingView</h1><span id="vw"></span><span id="ses"></span><span class="pill" id="clk"></span><span class="pill" id="feed"></span><button class="pill btn on" id="sf">SAFE SCALP: ON</button><button class="pill btn on" id="af">AUTO-FOLLOW: ON</button><button class="pill" id="cfg" style="cursor:pointer;background:none">⚙ Data</button></header>
+<div class="warn" style="padding:6px 14px">Harga &amp; chart = widget resmi TradingView (real-time). Mesin SMC mengambil candle asli secara otomatis (Binance / Yahoo Finance / Twelve Data), memindai 20 ticker terus-menerus di 1H·15M·5M dan mengikuti ticker TradingView yang sama. Selisih kecil harga dengan TradingView wajar. Tidak ada harga simulasi; <b>Data Guard</b> memblokir rekomendasi jika data tidak valid, cache atau tertunda. <b>Mode SAFE SCALP (default):</b> BUY/SELL hanya muncul saat 1H·15M·5M searah dan tren bersih (tidak fluktuatif), dengan target cepat RR 1:1,5, SL ketat, risiko ≤0,5%. Saat pasar fluktuatif tampil SKIP. <b>BUY?/SELL?</b> = kandidat lolos filter, harga sedang diperbarui (tunggu hingga tanpa tanda tanya).</div>
+<div id="setup" class="box" style="display:none;margin:0 14px 8px;border-color:#f5b73b;line-height:1.5">⚠ Baru <b id="setn">0</b>/20 ticker yang punya data asli. <b>Cara tercepat (±1 menit, gratis):</b> daftar di twelvedata.com → salin API key → klik <b>⚙ Data</b> → tempel di <b>Twelve Data API key</b> → Simpan. Forex, emas, perak, DXY, ETF &amp; saham terisi otomatis (data disimpan di browser agar hemat kuota 800 kredit/hari). Crypto (BTC/ETH) selalu live lewat Binance. Gunakan tombol <b>Cek sumber data</b> untuk melihat sumber mana yang bekerja di jaringan Anda. Opsional real-time penuh: Worker/GitHub Actions (lihat README).</div>
+<div id="mod" style="display:none;position:fixed;inset:0;background:#000b;z-index:9;align-items:center;justify-content:center"><div class="box" style="max-width:440px;width:92%;padding:16px">
+<b style="font-size:15px">Pengaturan Sumber Data</b>
+<p><label><input type="checkbox" id="bn"> Binance live (BTCUSDT, ETHUSDT) – tanpa key</label></p>
+<p><b>Twelve Data API key (disarankan – satu key untuk semua ticker non-crypto):</b><br><input id="key" type="password" placeholder="opsional" style="width:100%;margin-top:4px;padding:7px;background:#0b0f17;color:#d7deea;border:1px solid #232d3f;border-radius:6px"></p>
+<p>Worker URL (opsional – real-time 10 detik):<br><input id="px" placeholder="https://nama.workers.dev/" style="width:100%;margin-top:4px;padding:7px;background:#0b0f17;color:#d7deea;border:1px solid #232d3f;border-radius:6px"></p><p class="warn">Tanpa key: hanya BTC/ETH (Binance) dan percobaan Yahoo lewat proxy publik (tidak stabil). Dengan key gratis: riwayat dimuat sekali lalu diperbarui bertahap (ticker terpilih ±5 menit, ticker sesi aktif ±30 menit, menyesuaikan sisa kuota harian) dan disimpan di browser. Pengaturan hanya tersimpan di browser Anda.</p>
+<div id="tst" class="warn" style="margin-top:8px;line-height:1.6"></div><div style="display:flex;gap:8px;margin-top:10px"><button class="pill" id="tt" style="cursor:pointer;background:none">Cek sumber data</button><button class="pill on" id="sv" style="cursor:pointer">Simpan</button><button class="pill" id="cx" style="cursor:pointer;background:none">Tutup</button><button class="pill" id="rs" style="cursor:pointer;background:none;margin-left:auto">Reset</button></div></div></div>
+<div class="app"><aside class="box"><div class="tabs" id="tabs"></div><div id="list"></div><h3>Signal log (otomatis)</h3><div id="log"></div></aside>
+<main><div class="charts" id="charts"></div><div class="box" id="ana" style="margin-top:10px"></div><div class="box" id="scrbox" style="margin-top:10px"><b>TradingView Screener</b><div class="tabs" id="stabs" style="margin-top:6px"></div><div id="scr" style="height:520px"></div></div></main></div>
+<footer class="warn" style="padding:6px 14px 18px">Alat bantu analisis edukasi, bukan saran investasi. Widget © TradingView. Trading berisiko tinggi.</footer>
+<script>
+const SYM=[['USDJPY','FX:USDJPY',3,'USD/JPY','A'],['AUDUSD','FX:AUDUSD',5,'AUD/USD','A'],['EURJPY','FX:EURJPY',3,'EUR/JPY','A'],['NZDUSD','FX:NZDUSD',5,'NZD/USD','A'],['BTCUSD','BINANCE:BTCUSDT',1,'','A'],['ETHUSD','BINANCE:ETHUSDT',2,'','A'],
+['EURUSD','FX:EURUSD',5,'EUR/USD','L'],['GBPUSD','FX:GBPUSD',5,'GBP/USD','L'],['USDCHF','FX:USDCHF',5,'USD/CHF','L'],['EURGBP','FX:EURGBP',5,'EUR/GBP','L'],['XAUUSD','OANDA:XAUUSD',2,'XAU/USD','L'],['XAGUSD','OANDA:XAGUSD',3,'XAG/USD','L'],['DXY','TVC:DXY',3,'DXY','L'],
+['SPY','AMEX:SPY',2,'SPY','N'],['QQQ','NASDAQ:QQQ',2,'QQQ','N'],['DIA','AMEX:DIA',2,'DIA','N'],['GLD','AMEX:GLD',2,'GLD','N'],['AAPL','NASDAQ:AAPL',2,'AAPL','N'],['NVDA','NASDAQ:NVDA',2,'NVDA','N'],['TSLA','NASDAQ:TSLA',2,'TSLA','N']];
+const SES={A:[0,9,'ASIA'],L:[7,16,'LONDON'],N:[12,21,'NEW YORK']},LIVE={BTCUSD:'BTCUSDT',ETHUSD:'ETHUSDT'};
+const $=s=>document.querySelector(s);
+let SAFE=true,RRV=1.5;const G={er:.30,chop:50,er5:.25,chop5:55,flips:1,maxSL:1.5},PIP={USDJPY:.01,EURJPY:.01,AUDUSD:.0001,EURUSD:.0001,GBPUSD:.0001,XAUUSD:.1,XAGUSD:.01,NZDUSD:.0001,USDCHF:.0001,EURGBP:.0001};
+const D={},V={},BT={};let sel='EURUSD',flt='AUTO';
+for(const q of SYM)D[q[0]]={c5:[],src:'NONE'};
+const CK='smcd1_',SAVED={};let lastSave=0;
+function cacheSave(s){try{const d=D[s];if(d.c5.length<80||d.src.startsWith('CACHE'))return;localStorage.setItem(CK+s,JSON.stringify({src:d.src,c:d.c5.slice(-1500).map(b=>[Math.round(b.t/1000),b.o,b.h,b.l,b.c])}))}catch(e){}}
+function cacheLoad(){for(const q of SYM){try{const j=JSON.parse(localStorage.getItem(CK+q[0])||'null');if(!j||!j.c||j.c.length<80)continue;if(Date.now()-j.c[j.c.length-1][0]*1000>4*864e5)continue;const d=D[q[0]];d.c5=j.c.map(a=>({t:a[0]*1000,o:a[1],h:a[2],l:a[3],c:a[4]}));d.src='CACHE·'+String(j.src).replace('LIVE·','');d.ver=1}catch(e){}}}
+cacheLoad();
+function guard(s){const d=D[s],c=d.c5,r={ok:false,fresh:false,age:0,w:[],f:[]};if(c.length<300){r.f.push('baru '+c.length+' candle (min 300)');return r}
+ let bad=0,jump=0;for(let i=c.length-300;i<c.length;i++){const b=c[i];if(!(b.o>0&&b.h>0&&b.l>0&&b.c>0)||b.h<Math.max(b.o,b.c)*(1-1e-9)||b.l>Math.min(b.o,b.c)*(1+1e-9))bad++;if(i>0&&b.t-c[i-1].t<=9e5)jump=Math.max(jump,Math.abs(b.c/c[i-1].c-1))}
+ if(bad>2)r.f.push(bad+' candle tidak valid');const lim=(s==='BTCUSD'||s==='ETHUSD')?.12:.06;if(jump>lim)r.f.push('lonjakan harga tidak wajar '+(jump*100).toFixed(1)+'%');
+ r.age=(Date.now()-c[c.length-1].t)/6e4;const cache=d.src.startsWith('CACHE'),fl=d.src==='FILE·GitHub'?25:12;
+ if(cache)r.w.push('data cache, menunggu update live');else if(r.age>fl)r.w.push(r.age<=45?'data '+Math.round(r.age)+' mnt lalu, sedang diperbarui':'pasar tutup atau feed tertunda');
+ r.fresh=!cache&&r.age<=fl;r.scan=!cache&&r.age<=45;r.ok=!r.f.length;return r}
+function agg(c5,m){const ms=m*6e4,o=[];for(const b of c5){const t=Math.floor(b.t/ms)*ms,l=o[o.length-1];if(l&&l.t===t){l.h=Math.max(l.h,b.h);l.l=Math.min(l.l,b.l);l.c=b.c}else o.push({t,o:b.o,h:b.h,l:b.l,c:b.c})}return o}
+function analyze(c){
+ const L=c.length,n=3,res={trend:0,evs:[],setup:null,fvgs:[],atr:0};if(L<30)return res;
+ let a=0;for(let i=L-14;i<L;i++)a+=Math.max(c[i].h-c[i].l,Math.abs(c[i].h-c[i-1].c),Math.abs(c[i].l-c[i-1].c));a/=14;res.atr=a;
+ const sh=[],sl=[];
+ for(let j=n;j<L-n;j++){let H=1,W=1;for(let k=1;k<=n;k++){if(c[j].h<=c[j-k].h||c[j].h<=c[j+k].h)H=0;if(c[j].l>=c[j-k].l||c[j].l>=c[j+k].l)W=0}if(H)sh.push(j);if(W)sl.push(j)}
+ let tr=0,pH=-1,pL=-1,ih=0,il=0,uH=-1,uL=-1;const evs=[];
+ for(let k=n*2;k<L;k++){
+  while(ih<sh.length&&sh[ih]+n<=k)pH=sh[ih++];while(il<sl.length&&sl[il]+n<=k)pL=sl[il++];
+  if(pH>=0&&pH!==uH&&c[k].c>c[pH].h){evs.push({k,dir:1,type:tr===-1?'CHoCH':'BOS',lvl:c[pH].h,si:pH});uH=pH;tr=1}
+  else if(pL>=0&&pL!==uL&&c[k].c<c[pL].l){evs.push({k,dir:-1,type:tr===1?'CHoCH':'BOS',lvl:c[pL].l,si:pL});uL=pL;tr=-1}}
+ res.trend=tr;res.evs=evs.slice(-5);
+ for(let i=Math.max(2,L-90);i<L;i++){let g=null;if(c[i].l>c[i-2].h)g={i,d:1,lo:c[i-2].h,hi:c[i].l};else if(c[i].h<c[i-2].l)g={i,d:-1,lo:c[i].h,hi:c[i-2].l};if(!g)continue;let f=0;for(let k=i+1;k<L;k++)if(g.d===1?c[k].l<=g.lo:c[k].h>=g.hi){f=1;break}if(!f&&g.hi-g.lo>a*.15)res.fvgs.push(g)}
+ res.fvgs=res.fvgs.slice(-4);
+ let e=null;for(let i=evs.length-1;i>=0;i--){if(SAFE||evs[i].type==='CHoCH'){e=evs[i];break}}
+ if(!e||L-e.k>60||evs.some(x=>x.k>e.k&&x.dir!==e.dir))return res;
+ const d=e.dir;let m0=-1,best=d===1?1e18:-1e18;
+ for(let i=Math.max(0,e.si-12);i<=e.k;i++){if(d===1&&c[i].l<best){best=c[i].l;m0=i}if(d===-1&&c[i].h>best){best=c[i].h;m0=i}}
+ let oi=m0;for(let i=m0;i>=Math.max(0,m0-3);i--){if(d===1?c[i].c<c[i].o:c[i].c>c[i].o){oi=i;break}}
+ const ob={i:oi,lo:c[oi].l,hi:c[oi].h,d};
+ let fv=null;for(let i=m0+2;i<=Math.min(L-1,e.k+1);i++){let g=null;if(d===1&&c[i].l>c[i-2].h)g={i,d,lo:c[i-2].h,hi:c[i].l};if(d===-1&&c[i].h<c[i-2].l)g={i,d,lo:c[i].h,hi:c[i-2].l};if(g&&(!fv||g.hi-g.lo>fv.hi-fv.lo))fv=g}
+ const ovl=fv&&fv.lo<=ob.hi&&fv.hi>=ob.lo,zn=SAFE&&fv?fv:ob;let inv=0,touch=-1;
+ for(let i=e.k+1;i<L;i++){if(d===1?c[i].c<zn.lo:c[i].c>zn.hi){inv=1;break}if(touch<0&&(d===1?c[i].l<=zn.hi:c[i].h>=zn.lo))touch=i}
+ if(inv){res.inv=e;return res}
+ let conf=false,ct=-1;
+ if(touch>=0)for(let t=Math.max(touch,L-2,1);t<L;t++){const b=c[t],rg=b.h-b.l||1e-9;
+  const ok=d===1?(b.c>b.o&&(b.c>c[t-1].h||Math.min(b.o,b.c)-b.l>=.5*rg)):(b.c<b.o&&(b.c<c[t-1].l||b.h-Math.max(b.o,b.c)>=.5*rg));
+  if(ok&&Math.abs(b.c-(d===1?zn.hi:zn.lo))<2*a){conf=true;ct=t}}
+ const mid=(zn.hi+zn.lo)/2,entry=conf?c[ct].c:mid,buf=.15*a,sld=d===1?Math.min(zn.lo,conf?c[ct].l:zn.lo)-buf:Math.max(zn.hi,conf?c[ct].h:zn.hi)+buf,rk=Math.abs(entry-sld),rr=RRV,tp=entry+d*rk*rr;
+ const inz=c[L-1].l<=zn.hi&&c[L-1].h>=zn.lo,leg=Math.abs(c[e.k].c-best);
+ const score=25+(leg>=2.5*a?10:0)+15+(ovl?15:fv?8:0)+(touch>=0?15:0)+(conf?20:0);
+ res.setup={d,e,ob,zn,fvg:fv,ovl,conf,t:ct,touch,entry,sl:sld,tp,rr,score,leg:leg/a,status:conf?'CONFIRMED':inz?'RETEST':'WAIT'};return res}
+function bt(c,lo){const tr=[];let i=40;while(i<c.length-2){const w=c.slice(Math.max(0,i-159),i+1),a=analyze(w),s=a.setup;
+ if(s&&s.conf&&s.t===w.length-1&&(!SAFE||(qual(w,a,s.d,lo?G.er5:G.er,lo?G.chop5:G.chop).ok&&Math.abs(s.entry-s.sl)<=G.maxSL*a.atr))){let R=null,j=i+1;for(;j<Math.min(c.length,i+60);j++){const b=c[j],sl=s.d===1?b.l<=s.sl:b.h>=s.sl,tp=s.d===1?b.h>=s.tp:b.l<=s.tp;if(sl){R=-1;break}if(tp){R=s.rr;break}}
+  if(R===null)R=(c[j-1].c-s.entry)*s.d/Math.abs(s.entry-s.sl);tr.push(R);i=j}i++}
+ const w=tr.filter(x=>x>0),ls=tr.filter(x=>x<=0),gp=w.reduce((a,b)=>a+b,0),gl=Math.abs(ls.reduce((a,b)=>a+b,0));
+ return{n:tr.length,wr:tr.length?w.length/tr.length*100:0,tot:gp-gl,avg:tr.length?(gp-gl)/tr.length:0,pf:gl?gp/gl:gp?99:0}}
+const act=()=>{const d=new Date(),h=d.getUTCHours()+d.getUTCMinutes()/60;return Object.keys(SES).filter(k=>h>=SES[k][0]&&h<SES[k][1])};
+function erOf(c,n){if(c.length<n+1)return 0;let p=0;for(let i=c.length-n;i<c.length;i++)p+=Math.abs(c[i].c-c[i-1].c);return p?Math.abs(c[c.length-1].c-c[c.length-1-n].c)/p:0}
+function chopOf(c,n){if(c.length<n+2)return 100;let s=0,hh=-1e18,ll=1e18;for(let i=c.length-n;i<c.length;i++){s+=Math.max(c[i].h-c[i].l,Math.abs(c[i].h-c[i-1].c),Math.abs(c[i].l-c[i-1].c));hh=Math.max(hh,c[i].h);ll=Math.min(ll,c[i].l)}return hh>ll?100*Math.log10(s/(hh-ll))/Math.log10(n):100}
+function qual(c,r,d,er0,ch0){const L=c.length,er=erOf(c,20),ch=chopOf(c,14),fl=r.evs.filter(e=>e.type==='CHoCH'&&e.k>=L-60).length;return{er,ch,fl,ok:r.trend===d&&er>=er0&&ch<=ch0&&fl<=G.flips}}
+function sig(v){const c=v.cand,g=v.guard;if(g&&!g.ok)return'DATA?';if(g&&!g.scan)return c?'STALE':'—';if(!c)return'—';let b;if(!SAFE)b=c.conf&&v.sc>=70?(c.d>0?'BUY':'SELL'):'WATCH';else{const gt=v.gate;b=gt&&gt.ok&&v.sc>=70?(c.d>0?'BUY':'SELL'):c.conf?'SKIP':'WATCH'}return(b==='BUY'||b==='SELL')&&g&&!g.fresh?b+'?':b}
+const pp=(c,s)=>PIP[s]?` · SL ${(Math.abs(c.entry-c.sl)/PIP[s]).toFixed(1)} pip / TP ${(Math.abs(c.tp-c.entry)/PIP[s]).toFixed(1)} pip`:'';
+function tick(){for(const q of SYM){const s=q[0],c5=D[s].c5;if(c5.length<80){V[s]=null;continue}
+ const key=(D[s].ver||0)+'|'+act().join();if(V[s]&&V[s].key===key){V[s].age=(Date.now()-c5.at(-1).t)/6e4;V[s].guard=guard(s);continue}
+ const guardNow=guard(s);
+ const h1=agg(c5,60),m15=agg(c5,15),A={h1:analyze(h1),m15:analyze(m15),m5:analyze(c5.slice(-400))},on=act().includes(q[4]);
+ const cand=[A.m15.setup,A.m5.setup].filter(Boolean).sort((a,b)=>(b.conf-a.conf)||b.score-a.score)[0];
+ let gate=null;if(cand){const own=cand===A.m15.setup?A.m15:A.m5,q15=qual(m15,A.m15,cand.d,G.er,G.chop),q5=qual(c5.slice(-400),A.m5,cand.d,G.er5,G.chop5),rk=Math.abs(cand.entry-cand.sl)/own.atr,al=A.h1.trend===cand.d&&A.m15.trend===cand.d&&A.m5.trend===cand.d;
+  const chk=[['Data asli (Data Guard, umur '+Math.round(guardNow.age)+' mnt)',guardNow.ok&&guardNow.scan],['Searah 1H · 15M · 5M',al],['Tren bersih 15M (ER '+q15.er.toFixed(2)+' ≥ '+G.er+', CHOP '+q15.ch.toFixed(0)+' ≤ '+G.chop+')',q15.er>=G.er&&q15.ch<=G.chop],['Tren bersih 5M (ER '+q5.er.toFixed(2)+' ≥ '+G.er5+', CHOP '+q5.ch.toFixed(0)+' ≤ '+G.chop5+')',q5.er>=G.er5&&q5.ch<=G.chop5],['Tidak bolak-balik (CHoCH 15M '+q15.fl+' ≤ '+G.flips+' dalam 60 bar)',q15.fl<=G.flips],['Sesi utama ticker sedang aktif',on],['SL ketat ('+rk.toFixed(2)+' ≤ '+G.maxSL+' ATR)',rk<=G.maxSL],['Konfirmasi candle terbentuk',cand.conf]];
+  gate={chk,ok:chk.every(x=>x[1])}}
+ V[s]={key,gate,guard:guardNow,c:{h1,m15,m5:c5},A,cand,on,sc:cand?Math.min(100,cand.score+(cand.d===A.h1.trend?10:0)+(on?5:0)):0,pct:(c5.at(-1).c/c5[Math.max(0,c5.length-289)].c-1)*100,age:(Date.now()-c5.at(-1).t)/6e4}}}
+const CFG=(()=>{try{return JSON.parse(localStorage.getItem('smccfg'))||{}}catch(e){return{}}})();if(CFG.bn===undefined)CFG.bn=true;SAFE=CFG.safe!==false;RRV=SAFE?1.5:2.5;
+const saveCfg=()=>{try{localStorage.setItem('smccfg',JSON.stringify(CFG))}catch(e){}};
+const YH={USDJPY:'USDJPY=X',AUDUSD:'AUDUSD=X',EURJPY:'EURJPY=X',NZDUSD:'NZDUSD=X',BTCUSD:'BTC-USD',ETHUSD:'ETH-USD',EURUSD:'EURUSD=X',GBPUSD:'GBPUSD=X',USDCHF:'USDCHF=X',EURGBP:'EURGBP=X',XAUUSD:'XAUUSD=X',XAGUSD:'XAGUSD=X',DXY:'DX-Y.NYB',SPY:'SPY',QQQ:'QQQ',DIA:'DIA',GLD:'GLD',AAPL:'AAPL',NVDA:'NVDA',TSLA:'TSLA'};
+const TDQ=(()=>{try{const j=JSON.parse(localStorage.getItem('smctd'));if(j&&j.d===new Date().toISOString().slice(0,10))return j}catch(e){}return{d:new Date().toISOString().slice(0,10),n:0}})();
+let TDERR='',tdHits=[],route=0,AUTO=true,lastSw=0;const T0=Date.now(),WK={last:0,full:0,fullAt:0,busy:0,err:'',need:false};const LOG=[],PREV={},ST={},enc=encodeURIComponent;
+for(const q of SYM)ST[q[0]]={last:0,busy:0,err:''};
+const ROUTES=()=>[CFG.px?u=>CFG.px+(CFG.px.includes('?')?'&':'?')+'url='+enc(u):null,u=>'https://corsproxy.io/?url='+enc(u),u=>'https://api.allorigins.win/raw?url='+enc(u)].filter(Boolean);
+async function getJ(url){const R=ROUTES();let e;for(let k=0;k<R.length;k++){const i=(route+k)%R.length;try{const x=await fetch(R[i](url));if(!x.ok)throw 0;const j=await x.json();route=i;return j}catch(er){e=er}}throw e}
+async function srcYahoo(s){const j=await getJ('https://query1.finance.yahoo.com/v8/finance/chart/'+enc(YH[s])+'?interval=5m&range=10d&includePrePost=false'),r=j.chart.result[0],q=r.indicators.quote[0],o=[];
+ r.timestamp.forEach((t,i)=>{if(q.open[i]!=null&&q.high[i]!=null&&q.low[i]!=null&&q.close[i]!=null)o.push({t:t*1000,o:q.open[i],h:q.high[i],l:q.low[i],c:q.close[i]})});return o.slice(-1700)}
+const TDG={next:0},q0=s=>SYM.find(q=>q[0]===s),TDBLK={},viaTD=s=>!!(CFG.key&&q0(s)[3]&&!(LIVE[s]&&CFG.bn)&&!(TDBLK[s]>Date.now()));
+function tdDay(){const d=new Date().toISOString().slice(0,10);if(TDQ.d!==d){TDQ.d=d;TDQ.n=0}}
+function tdCount(){tdDay();TDQ.n++;try{localStorage.setItem('smctd',JSON.stringify(TDQ))}catch(e){}}
+const tdLeft=()=>{tdDay();return(CFG.tdMax||760)-TDQ.n};
+const mergeBars=(a,b)=>{const m=new Map(a.map(x=>[x.t,x]));b.forEach(x=>m.set(x.t,x));return[...m.values()].sort((x,y)=>x.t-y.t).slice(-1700)};
+async function srcTD(s){if(tdLeft()<=0){TDERR='kuota harian TD hampir habis';throw 'quota'}
+ const now=Date.now();tdHits=tdHits.filter(t=>now-t<6e4);if(tdHits.length>=7)throw 'rate';tdHits.push(now);tdCount();
+ const d=D[s],last=d.c5.length?d.c5[d.c5.length-1].t:0,inc=d.c5.length>=300&&now-last<9e6;
+ const j=await(await fetch('https://api.twelvedata.com/time_series?symbol='+enc(q0(s)[3])+'&interval=5min&outputsize='+(inc?40:1500)+'&order=ASC&timezone=UTC&apikey='+enc(CFG.key))).json();
+ if(!j.values||j.values.length<(inc?5:60)){TDERR=(j.message||'kosong').slice(0,80);if(j.code===400||j.code===403||j.code===404||/plan|symbol|not found|available/i.test(j.message||''))TDBLK[s]=Date.now()+216e5;throw 'td'}TDERR='';
+ const bars=j.values.map(x=>({t:Date.parse(x.datetime.replace(' ','T')+'Z'),o:+x.open,h:+x.high,l:+x.low,c:+x.close}));return inc?mergeBars(d.c5,bars):bars}
+async function srcBN(s){const k=await(await fetch('https://data-api.binance.vision/api/v3/klines?symbol='+LIVE[s]+'&interval=5m&limit=1000')).json();if(!Array.isArray(k))throw 0;return k.map(x=>({t:x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4]}))}
+async function load(s){const st=ST[s];if(st.busy)return;st.busy=1;st.last=Date.now();const tr=[];
+ if(LIVE[s]&&CFG.bn)tr.push(['LIVE·Binance',srcBN]);if(viaTD(s))tr.push(['LIVE·TD',srcTD]);if(YH[s])tr.push(['LIVE·Yahoo',srcYahoo]);
+ st.err='semua sumber gagal';
+ for(const[n,f]of tr){try{const c=await f(s);if(c.length>=60){D[s].c5=c;D[s].src=n;D[s].ver=(D[s].ver||0)+1;st.err='';break}}catch(e){}}
+ st.fails=st.err?(st.fails||0)+1:0;st.next=st.err?Date.now()+Math.min(20e3*st.fails,3e5):0;
+ st.busy=0}
+function parseY(j){const r=j&&j.chart&&j.chart.result&&j.chart.result[0];if(!r||!r.timestamp)return[];const q=r.indicators.quote[0],o=[];r.timestamp.forEach((t,i)=>{if(q.open[i]!=null&&q.high[i]!=null&&q.low[i]!=null&&q.close[i]!=null)o.push({t:t*1000,o:q.open[i],h:q.high[i],l:q.low[i],c:q.close[i]})});return o}
+async function wk(){if(WK.busy)return;WK.busy=1;WK.last=Date.now();const full=!WK.full||(WK.need&&Date.now()-WK.fullAt>45e3);if(full)WK.fullAt=Date.now();
+ try{const x=await fetch(CFG.px+(CFG.px.includes('?')?'&':'?')+'all=1&r='+(full?'10d':'1d'));if(!x.ok)throw new Error('HTTP '+x.status);const J=await x.json();let n=0;
+  for(const s in J){const c=parseY(J[s]);if(!c.length||!D[s])continue;const d=D[s];if(LIVE[s]&&CFG.bn&&d.src==='LIVE·Binance')continue;
+   if(full||d.c5.length<80||d.src!=='LIVE·Worker')d.c5=c.slice(-1700);else{const m=new Map(d.c5.map(b=>[b.t,b]));c.forEach(b=>m.set(b.t,b));d.c5=[...m.values()].sort((a,b)=>a.t-b.t).slice(-1700)}
+   d.src='LIVE·Worker';d.ver=(d.ver||0)+1;ST[s].err='';ST[s].last=Date.now();n++}
+  if(full&&n>0)WK.full=1;WK.need=SYM.some(q=>D[q[0]].c5.length<300&&!(LIVE[q[0]]&&CFG.bn));WK.err=n?'':'worker kosong'}catch(e){WK.err='worker: '+(e&&e.message||e)}
+ WK.busy=0}
+const FL={last:0,busy:0,err:'',upd:0};
+async function fileFeed(){if(FL.busy)return;FL.busy=1;FL.last=Date.now();
+ try{const x=await fetch('data/market.json?t='+Date.now(),{cache:'no-store'});if(!x.ok)throw new Error('HTTP '+x.status);const J=await x.json();let n=0;FL.upd=J.updated||0;
+  for(const s in J.data){const d=D[s];if(!d)continue;const c=J.data[s].map(a=>({t:a[0]*1000,o:a[1],h:a[2],l:a[3],c:a[4]}));if(c.length<80)continue;
+   const cur=d.c5.length?d.c5[d.c5.length-1].t:0,lt=c[c.length-1].t,isF=d.src==='FILE·GitHub';
+   if(!isF&&lt<=cur)continue;if(isF&&lt===cur&&c[c.length-1].c===d.c5[d.c5.length-1].c)continue;
+   d.c5=c;d.src='FILE·GitHub';d.ver=(d.ver||0)+1;ST[s].err='';ST[s].last=Date.now();n++}
+  FL.err=''}catch(e){FL.err='file: '+(e&&e.message||e)}
+ FL.busy=0}
+function tdIv(s,ac){const h=new Date(),hrs=Math.max(.5,24-(h.getUTCHours()+h.getUTCMinutes()/60)),allow=Math.max(1,tdLeft()/hrs);let dem=0;
+ for(const q of SYM){const x=q[0];if(x===sel||!viaTD(x)||!D[x].c5.length)continue;dem+=3.6e6/(ac.includes(q[4])?18e5:108e5)}
+ const k=Math.max(1,dem/Math.max(1,allow-12));return s===sel?3e5:(ac.includes(q0(s)[4])?18e5:108e5)*k}
+function sched(){const ac=act(),now=Date.now();
+ if(CFG.px&&now-WK.last>=10e3)wk();
+ if(now-FL.last>=(FL.upd?60e3:6e5))fileFeed();
+ const due=SYM.map(q=>q[0]).filter(s=>{const st=ST[s];if(st.busy||now<(st.next||0))return false;
+  if((CFG.px&&!WK.err||FL.upd>0&&!FL.err&&!CFG.key)&&!(LIVE[s]&&CFG.bn))return false;
+  const a=ac.includes(q0(s)[4]),fresh0=!D[s].c5.length||D[s].src.startsWith('CACHE');
+  const iv=viaTD(s)?(fresh0?0:tdIv(s,ac)):(s===sel?12e3:a?3e4:9e4);return now-st.last>=iv});
+ due.sort((a,b)=>(b===sel)-(a===sel)||ST[a].last-ST[b].last);
+ let n=0,td=false;for(const s of due){if(n>=4)break;if(viaTD(s)){if(td||now<TDG.next)continue;td=true;TDG.next=now+9e3}load(s);n++}}
+function updAF(){const b=$('#af');b.textContent='AUTO-FOLLOW: '+(AUTO?'ON':'OFF');b.classList.toggle('on',AUTO)}
+function visible(){const A=act();let L=SYM.map(q=>q[0]);if(flt==='AUTO'&&A.length)L=SYM.filter(q=>A.includes(q[4])).map(q=>q[0]);else if('ALN'.includes(flt)&&flt!=='AUTO')L=SYM.filter(q=>q[4]===flt).map(q=>q[0]);const gk=s=>V[s]&&V[s].gate&&V[s].gate.ok?1:0;return L.sort((a,b)=>(SAFE?gk(b)-gk(a):0)||(V[b]?V[b].sc:-1)-(V[a]?V[a].sc:-1))}
+function watch(){for(const q of SYM){const s=q[0],v=V[s],k=v&&(sig(v)==='BUY'||sig(v)==='SELL')?v.cand.d+':'+v.cand.entry.toFixed(5):'';
+  if(k&&PREV[s]!==k){LOG.unshift({t:new Date().toUTCString().slice(17,25),s,d:v.cand.d,sc:v.sc});LOG.length=Math.min(LOG.length,8)}PREV[s]=k}
+ if(AUTO&&Date.now()-lastSw>6e4){const L=visible().filter(s=>V[s]&&V[s].cand&&V[s].sc>=60&&(!SAFE||(V[s].gate&&V[s].gate.ok))),t=L[0];
+  if(t&&t!==sel&&(!V[sel]||!V[sel].cand||V[sel].sc<V[t].sc)){sel=t;ST[t].last=0;lastSw=Date.now();loadTV()}}}
+function draw(cv,c,r,lab,dec){const dp=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(W<50)return;cv.width=W*dp;cv.height=H*dp;const x=cv.getContext('2d');x.scale(dp,dp);
+ const N=Math.min(70,c.length),off=c.length-N,v=c.slice(off),s=r.setup;let hi=Math.max(...v.map(b=>b.h)),lo=Math.min(...v.map(b=>b.l));
+ if(s){hi=Math.max(hi,s.entry,s.sl);lo=Math.min(lo,s.entry,s.sl)}const pd=(hi-lo)*.06;hi+=pd;lo-=pd;
+ const Y=p=>8+(hi-p)/(hi-lo)*(H-26),bw=(W-58)/N,X=i=>i*bw+bw/2,R=W-58;
+ const box=(i,a,b,col)=>{const x0=Math.max(0,X(i-off)-bw/2);x.fillStyle=col;x.fillRect(x0,Y(b),R-x0,Math.max(2,Y(a)-Y(b)))};
+ r.fvgs.forEach(g=>box(g.i-2,g.lo,g.hi,'rgba(168,85,247,.22)'));
+ if(s){box(s.ob.i,s.ob.lo,s.ob.hi,s.d===1?'rgba(38,166,154,.28)':'rgba(239,83,80,.28)');if(s.fvg)box(s.fvg.i-2,s.fvg.lo,s.fvg.hi,'rgba(168,85,247,.3)')}
+ x.font='10px system-ui';r.evs.forEach(e=>{if(e.k<off)return;const xs=Math.max(0,X(e.si-off));x.strokeStyle=e.type==='CHoCH'?'#f5b73b':'#7b879c';x.setLineDash([4,3]);x.beginPath();x.moveTo(xs,Y(e.lvl));x.lineTo(X(e.k-off),Y(e.lvl));x.stroke();x.setLineDash([]);x.fillStyle=x.strokeStyle;x.fillText(e.type+(e.dir>0?'↑':'↓'),(xs+X(e.k-off))/2-12,Y(e.lvl)-3)});
+ v.forEach((b,i)=>{const u=b.c>=b.o;x.strokeStyle=x.fillStyle=u?'#26a69a':'#ef5350';x.beginPath();x.moveTo(X(i),Y(b.h));x.lineTo(X(i),Y(b.l));x.stroke();x.fillRect(X(i)-bw*.35,Math.min(Y(b.o),Y(b.c)),bw*.7,Math.max(1,Math.abs(Y(b.o)-Y(b.c))))});
+ const ln=(p,col,t)=>{if(p>hi||p<lo)return;x.strokeStyle=col;x.setLineDash([6,3]);x.beginPath();x.moveTo(0,Y(p));x.lineTo(R,Y(p));x.stroke();x.setLineDash([]);x.fillStyle=col;x.fillText(t+' '+p.toFixed(dec),R+2,Y(p)+3)};
+ if(s){ln(s.entry,'#d7deea','ENT');ln(s.sl,'#ef5350','SL');ln(s.tp,'#26a69a','TP')}
+ const last=c[c.length-1].c;x.fillStyle='#4c8dff';x.fillText(last.toFixed(dec),R+2,Y(last)+3);
+ x.fillStyle='#d7deea';x.font='bold 12px system-ui';x.fillText(lab+'  '+(r.trend>0?'▲ Bullish':r.trend<0?'▼ Bearish':'— Netral')+(s?'  ['+s.status+']':''),8,14)}
+const fm=(s,p)=>p.toFixed(SYM.find(q=>q[0]===s)[2]);
+const tvs=s=>SYM.find(q=>q[0]===s)[1];
+function renderList(){const L=visible();
+ $('#list').innerHTML=L.map(s=>{const v=V[s];if(!v)return`<div class="row dim ${s===sel?'sel':''}" data-s="${s}"><b>${s}<small>${tvs(s)}</small></b><span class="warn">${D[s].c5.length?'memuat…':'no data'}</span><span></span></div>`;
+  const c=v.cand,sg=sig(v);
+  return`<div class="row ${s===sel?'sel':''} ${v.on?'':'dim'}" data-s="${s}"><b>${s}<small>${D[s].src}${v.age>(D[s].src==='FILE·GitHub'?40:20)?' · STALE':''}</small></b><span>${fm(s,D[s].c5.at(-1).c)}<small class="${v.pct>=0?'up':'dn'}">${v.pct.toFixed(2)}%</small></span><span class="sig ${sg.startsWith('BUY')?'up':sg.startsWith('SELL')?'dn':''}">${sg}<small>${v.sc}/100</small></span></div>`}).join('')}
+function ck(o,t){return`<td class="${o?'ok':'no'}">${o?'✓ ':'– '}${t||''}</td>`}
+function renderAna(){const s=sel,v=V[s],d=SYM.find(q=>q[0]===s)[2],pr=SYM.find(q=>q[0]===s)[4],A=act(),now=new Date();
+ const T=[['1H',v.A.h1],['15M',v.A.m15],['5M',v.A.m5]],lastEv=r=>{const e=r.evs.at(-1);return e?e.type+(e.dir>0?' ↑':' ↓'):'-'};
+ const cell=(f)=>T.map(([n,r])=>f(r.setup,r)).join('');
+ const b=BT[s];const btR=b&&b.res?T.map(([n,r],i)=>{const q=b.res[['h1','m15','m5'][i]];return`<tr><td>${n}</td><td>${q.n}</td><td>${q.wr.toFixed(0)}%</td><td>${q.avg.toFixed(2)}R</td><td>${q.tot.toFixed(1)}R</td><td>${q.pf.toFixed(2)}</td></tr>`}).join(''):'<tr><td colspan=6>menghitung…</td></tr>';
+ const c=v.cand,al=c&&c.d===v.A.h1.trend;
+ let plan='<p>Belum ada setup CHoCH + POI valid di 15M/5M. Tunggu CHoCH baru dengan displacement kuat.</p>';
+ if(c)plan=`<p><b class="${c.d>0?'up':'dn'}">${c.d>0?'BUY':'SELL'}</b> (${c.conf?'konfirmasi sudah terbentuk':'limit/tunggu retest'}) · Entry <b>${c.entry.toFixed(d)}</b> · SL <b>${c.sl.toFixed(d)}</b> · TP <b>${c.tp.toFixed(d)}</b> · RR 1:${c.rr}${pp(c,s)}</p><p>Zona entry ${(c.zn||c.ob).lo.toFixed(d)}–${(c.zn||c.ob).hi.toFixed(d)} (OB ${c.ob.lo.toFixed(d)}–${c.ob.hi.toFixed(d)})${c.fvg?` · FVG ${c.fvg.lo.toFixed(d)}–${c.fvg.hi.toFixed(d)}${c.ovl?' (overlap OB = confluence kuat)':''}`:''}. Invalidasi: close menembus ${c.d>0?'bawah':'atas'} OB. Risiko disarankan ≤${SAFE?'0,5':'1'}% ekuitas${SAFE?', ambil target cepat, jangan digeser':''}.</p>`;
+ const gd=v.guard||guard(s),lb=D[s].c5[D[s].c5.length-1],gt=v.gate,allowed=gd.ok&&gd.fresh&&(!SAFE||(gt&&gt.ok&&v.sc>=70));
+ const gdTxt=(gd.ok&&gd.fresh?'<span class="ok">✅ Data Guard: data asli &amp; segar</span>':gd.ok?'<span class="no">⚠ Data Guard: data asli tetapi belum segar – rekomendasi ditahan</span>':'<span class="dn">⛔ Data Guard GAGAL – rekomendasi diblokir</span>')+' · sumber '+D[s].src+' · '+D[s].c5.length+' candle · candle terakhir '+new Date(lb.t).toUTCString().slice(5,22)+' UTC ('+Math.round(gd.age)+' mnt lalu)'+(gd.f.length||gd.w.length?' · '+gd.f.concat(gd.w).join('; '):'');
+ let verdict='';
+ if(SAFE)verdict=!c?'<p class="warn">Mode SAFE SCALP aktif. Belum ada setup; tunggu pasar membentuk tren bersih.</p>':`<p>${allowed?'<b class="up">✅ BOLEH ENTRY</b> – tren bersih dan semua syarat terpenuhi.':(gd.ok&&!gd.fresh&&gt&&gt.ok&&v.sc>=70)?'<b class="no">⏳ MENUNGGU DATA SEGAR</b> – kandidat lolos filter, harga sedang diperbarui. Jangan entry sebelum label berubah menjadi BUY/SELL tanpa tanda tanya.':'<b class="dn">⛔ JANGAN ENTRY</b> – '+(gt.chk.filter(x=>!x[1]).map(x=>x[0]).join('; ')||'skor < 70')+'.'}</p><table><tr><th>Syarat Safe Scalp</th><th>Status</th></tr>${gt.chk.map(x=>`<tr><td style="text-align:left">${x[0]}</td>${ck(x[1],'')}</tr>`).join('')}</table>`;
+ if(c&&!allowed)plan='<p class="warn">Level referensi saja (belum aman untuk entry):</p>'+plan;
+ $('#ana').innerHTML=`<b style="font-size:15px">${s}</b> <span class="pill">${D[s].src} · update ${Math.round((Date.now()-ST[s].last)/1000)}s lalu</span>
+ <p>${gdTxt}</p>
+ <h3>1. Konteks Sesi</h3><p>${now.toUTCString().slice(17,25)} UTC · Sesi aktif: <b>${A.length?A.map(k=>SES[k][2]).join(' + '):'Off-session (rollover)'}</b>${A.length>1?' → <b>OVERLAP</b>, likuiditas &amp; volatilitas tertinggi':''}. Sesi utama ${s}: <b>${SES[pr][2]}</b> (${v.on?'sedang aktif, setup lebih bisa dipercaya':'tidak aktif, hati-hati false breakout'}).</p>
+ <h3>2. Checklist SMC (top-down)</h3><table><tr><th>Kriteria</th><th>1H</th><th>15M</th><th>5M</th></tr>
+ <tr><td>Struktur terakhir</td>${T.map(([n,r])=>`<td>${r.trend>0?'▲':r.trend<0?'▼':'–'} ${lastEv(r)}</td>`).join('')}</tr>
+ <tr><td>CHoCH valid</td>${cell(s=>ck(!!s,s&&('+'+s.leg.toFixed(1)+' ATR')))}</tr>
+ <tr><td>Order Block</td>${cell(s=>ck(!!s,s&&s.ob.lo.toFixed(d)))}</tr>
+ <tr><td>FVG (imbalance)</td>${cell(s=>ck(s&&s.fvg,s&&(s.ovl?'overlap OB':'')))}</tr>
+ <tr><td>Retest POI</td>${cell(s=>ck(s&&s.touch>=0,s&&s.status))}</tr>
+ <tr><td>Konfirmasi candle</td>${cell(s=>ck(s&&s.conf,s&&s.conf?'engulf/rejection':''))}</tr>
+ <tr><td>Skor</td>${cell(s=>`<td>${s?s.score:0}</td>`)}</tr></table>
+ <h3>3. Keputusan & Rencana Entry</h3>${verdict}${plan}<p>Bias 1H: <b>${v.A.h1.trend>0?'Bullish':v.A.h1.trend<0?'Bearish':'Netral'}</b> · ${c?(al?'<span class="ok">searah HTF (A+ setup)</span>':'<span class="dn">melawan HTF, kurangi ukuran/skip</span>'):''} · Skor total ${v.sc}/100.</p>
+ <h3>4. Backtest (±5 hari data, RR 1:${RRV}, ${SAFE?'hanya setup yang lolos filter tren bersih':'semua setup'})</h3><table><tr><th>TF</th><th>Trade</th><th>Win</th><th>Avg</th><th>Total</th><th>PF</th></tr>${btR}</table>
+ <p class="warn">Backtest memakai candle 5M asli dari feed (Binance ±3,5 hari, Yahoo ±10 hari, Twelve Data ±5 hari). Hasil masa lalu tidak menjamin masa depan. Bukan saran investasi.</p>`}
+function runBT(){const b=BT[sel];if(b&&Date.now()-b.t<9e4)return;BT[sel]={t:Date.now(),res:null};const s=sel;setTimeout(()=>{const c=V[s].c;BT[s].res={h1:bt(c.h1),m15:bt(c.m15),m5:bt(c.m5,true)}},50)}
+function frame(){try{frame0()}catch(e){console.error(e)}}
+function frame0(){tick();watch();if(Date.now()-lastSave>6e4){lastSave=Date.now();for(const q of SYM){const d=D[q[0]];if(d.ver&&SAVED[q[0]]!==d.ver){cacheSave(q[0]);SAVED[q[0]]=d.ver}}}const A=act(),v=V[sel],dec=SYM.find(q=>q[0]===sel)[2];
+ $('#ses').innerHTML=Object.entries(SES).map(([k,x])=>`<span class="pill ${A.includes(k)?(A.length>1?'ov':'on'):''}">${x[2]} ${String(x[0]).padStart(2,0)}–${x[1]} UTC</span>`).join(' ');
+ const n=new Date();$('#clk').textContent='UTC '+n.toUTCString().slice(17,25)+' · WIB '+new Date(n.getTime()+252e5).toUTCString().slice(17,25);
+ const nl=SYM.filter(q=>V[q[0]]).length,bz=SYM.filter(q=>ST[q[0]].busy).length;$('#feed').textContent='SMC scan '+nl+'/20 · segar '+SYM.filter(q=>V[q[0]]&&V[q[0]].guard&&V[q[0]].guard.ok&&V[q[0]].guard.fresh).length+(CFG.key?' · TD '+TDQ.n+'/'+(CFG.tdMax||760):'')+' · '+n.toUTCString().slice(17,25)+(bz?' · ↻'+bz:'')+(FL.upd?' · data.json '+Math.round((Date.now()/1000-FL.upd)/60)+' mnt':'')+(WK.err?' · '+WK.err:'')+(TDERR?' · TD: '+TDERR:'');
+ $('#setn').textContent=nl;$('#setup').style.display=nl<18&&Date.now()-T0>15e3&&!WK.busy?'block':'none';
+ renderList();
+ $('#log').innerHTML=LOG.length?LOG.map(x=>`<div style="display:grid;grid-template-columns:62px 1fr auto;gap:4px;padding:3px 6px"><span class="warn">${x.t}</span><b class="${x.d>0?'up':'dn'}">${x.d>0?'BUY':'SELL'} ${x.s}</b><span class="warn">${x.sc}</span></div>`).join(''):'<span class="warn">Menunggu sinyal terkonfirmasi (skor ≥70)…</span>';
+ if(!v){$('#ana').innerHTML='<b style="font-size:15px">'+sel+'</b><p>Mengambil data otomatis'+(ST[sel].err?' · '+ST[sel].err+' (mencoba lagi)':'')+'… Jika terus gagal, isi Proxy/Twelve Data key di ⚙ Data.</p><p class="warn">Chart TradingView di atas tetap real-time.</p>';return}
+ [['h1','1H'],['m15','15M'],['m5','5M']].forEach(([k,l])=>draw($('#cv'+k),v.c[k],v.A[k],l,dec));runBT();renderAna()}
+$('#tabs').innerHTML=[['AUTO','Auto (sesi aktif)'],['A','Asia'],['L','London'],['N','New York'],['ALL','Semua']].map(([k,l])=>`<button data-f="${k}">${l}</button>`).join('');
+$('#charts').innerHTML=[['h1','1H'],['m15','15M'],['m5','5M']].map(([k,l])=>`<div class="box"><div class="tvw" id="tv_${k}"></div><canvas id="cv${k}"></canvas></div>`).join('');
+$('#tabs').onclick=e=>{if(e.target.dataset.f){flt=e.target.dataset.f;[...$('#tabs').children].forEach(b=>b.classList.toggle('on',b.dataset.f===flt))}};
+$('#tabs').children[0].classList.add('on');
+$('#list').onclick=e=>{const r=e.target.closest('.row');if(r){sel=r.dataset.s;ST[sel].last=0;AUTO=false;updAF();loadTV()}};
+function tvEmbed(el,file,cfg){el.innerHTML='';const w=document.createElement('div');w.className='tradingview-widget-container';w.style.height='100%';const i=document.createElement('div');i.className='tradingview-widget-container__widget';i.style.height='100%';w.appendChild(i);const sc=document.createElement('script');sc.src='https://s3.tradingview.com/external-embedding/'+file;sc.async=true;sc.text=JSON.stringify(cfg);w.appendChild(sc);el.appendChild(w)}
+function loadTV(){const sy=tvs(sel);[['h1','60'],['m15','15'],['m5','5']].forEach(([k,iv])=>tvEmbed($('#tv_'+k),'embed-widget-advanced-chart.js',{autosize:true,symbol:sy,interval:iv,timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',backgroundColor:'#131a26',hide_side_toolbar:true,allow_symbol_change:false,save_image:false,calendar:false,support_host:'https://www.tradingview.com'}))}
+function loadScr(m){tvEmbed($('#scr'),'embed-widget-screener.js',{width:'100%',height:520,defaultColumn:'overview',defaultScreen:'general',market:m,showToolbar:true,colorTheme:'dark',locale:'en'})}
+$('#stabs').innerHTML=['forex','crypto','america','cfd'].map(m=>`<button data-m="${m}">${m}</button>`).join('');
+$('#stabs').onclick=e=>{if(e.target.dataset.m){loadScr(e.target.dataset.m);[...$('#stabs').children].forEach(b=>b.classList.toggle('on',b===e.target))}};
+$('#vw').innerHTML=[['both','TV + SMC'],['tv','TradingView'],['smc','SMC Engine']].map(([k,l])=>`<button class="pill btn" data-v="${k}">${l}</button>`).join(' ');
+$('#vw').onclick=e=>{if(e.target.dataset.v){document.body.dataset.view=e.target.dataset.v;[...$('#vw').children].forEach(b=>b.classList.toggle('on',b===e.target))}};
+document.body.dataset.view='both';$('#vw').children[0].classList.add('on');
+function updSF(){const b=$('#sf');b.textContent='SAFE SCALP: '+(SAFE?'ON':'OFF');b.classList.toggle('on',SAFE)}
+$('#sf').onclick=()=>{SAFE=!SAFE;RRV=SAFE?1.5:2.5;CFG.safe=SAFE;saveCfg();for(const k in V)if(V[k])V[k].key='';for(const k in BT)delete BT[k];updSF()};
+$('#af').onclick=()=>{AUTO=!AUTO;lastSw=0;updAF()};
+const mod=$('#mod');
+$('#cfg').onclick=()=>{$('#key').value=CFG.key||'';$('#px').value=CFG.px||'';$('#bn').checked=!!CFG.bn;mod.style.display='flex'};
+$('#cx').onclick=()=>mod.style.display='none';
+async function selfTest(){const out=$('#tst');out.textContent='menguji sumber data…';const R=[],t=async(n,f)=>{const t0=Date.now();try{R.push([n,true,(await f())+' · '+(Date.now()-t0)+' ms'])}catch(e){R.push([n,false,String(e&&e.message||e).slice(0,70)])}};
+ await t('Binance (BTC/ETH)',async()=>{const k=await(await fetch('https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=2')).json();if(!Array.isArray(k))throw 'respon bukan data';return 'BTC '+(+k[k.length-1][4]).toFixed(1)});
+ if(CFG.key)await t('Twelve Data',async()=>{const j=await(await fetch('https://api.twelvedata.com/time_series?symbol=EUR/USD&interval=5min&outputsize=1&timezone=UTC&apikey='+enc(CFG.key))).json();tdCount();if(!j.values)throw j.message||'key ditolak';return 'EUR/USD '+j.values[0].close+' ('+j.values[0].datetime+' UTC)'});else R.push(['Twelve Data',false,'key belum diisi']);
+ await t('Yahoo via proxy',async()=>{const c=await srcYahoo('EURUSD');return c.length+' candle EUR/USD'});
+ if(CFG.px)await t('Worker',async()=>{const x=await fetch(CFG.px+(CFG.px.includes('?')?'&':'?')+'all=1&r=1d');if(!x.ok)throw 'HTTP '+x.status;return Object.keys(await x.json()).length+' ticker'});
+ await t('data.json (GitHub)',async()=>{const x=await fetch('data/market.json?t='+Date.now(),{cache:'no-store'});if(!x.ok)throw 'tidak ada (opsional)';const j=await x.json();return Object.keys(j.data).length+' ticker'});
+ out.innerHTML=R.map(r=>(r[1]?'<span class="ok">✓</span> ':'<span class="dn">✗</span> ')+r[0]+' – '+r[2]).join('<br>')}
+$('#tt').onclick=()=>{CFG.key=$('#key').value.trim();CFG.px=$('#px').value.trim();selfTest()};
+$('#sv').onclick=()=>{CFG.key=$('#key').value.trim();CFG.px=$('#px').value.trim();CFG.bn=$('#bn').checked;saveCfg();mod.style.display='none';for(const k in ST)ST[k].last=0;WK.last=0;WK.full=0;WK.err='';FL.last=0;sched()};
+$('#rs').onclick=()=>{try{localStorage.removeItem('smccfg')}catch(e){}location.reload()};
+sel='EURUSD';updAF();updSF();loadTV();loadScr('forex');$('#stabs').children[0].classList.add('on');
+tick();sched();setInterval(sched,2000);setInterval(frame,1000);frame();
+</script></body></html>
